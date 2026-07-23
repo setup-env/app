@@ -1,0 +1,58 @@
+name: Module submission
+description: Request catalog review for an implemented public module.
+title: "[Module submission] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit the catalog change through a pull request. This form records the governance review.
+  - type: input
+    id: repository
+    attributes:
+      label: Public repository
+      placeholder: owner/repository
+    validations:
+      required: true
+  - type: input
+    id: module-id
+    attributes:
+      label: Module ID
+    validations:
+      required: true
+  - type: dropdown
+    id: trust
+    attributes:
+      label: Requested trust
+      description: Maintainers make the final assignment. Contributors cannot self-assign verified or official.
+      options:
+        - community
+        - verified
+        - official
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation evidence
+      description: Include manifest, tests, releases, documentation, and local validation.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and maintenance
+      description: Describe ownership, vulnerability handling, elevation, network access, secret inputs, and maintenance commitments.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: The repository is public and contains a valid setup-env.yaml.
+          required: true
+        - label: The manifest contains no self-declared trust or secrets.
+          required: true
+        - label: I understand Awesome-list inclusion does not grant catalog trust.
+          required: true

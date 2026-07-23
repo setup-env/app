@@ -1,0 +1,38 @@
+# Reference manifest for Milestone 02. This is not the live manifest of the
+# setup-env/workstation repository.
+schema_version: 1
+id: workstation
+name: Workstation
+description: Configure a cross-platform developer workstation.
+repository:
+  owner: setup-env
+  name: workstation
+  issues_url: https://github.com/setup-env/workstation/issues
+version:
+  source: github-release
+publisher: Setup Env
+license: MIT
+homepage: https://github.com/setup-env/workstation
+documentation: https://github.com/setup-env/workstation#readme
+minimum_app_version: 0.2.0
+platforms:
+  operating_systems:
+    - darwin
+    - linux
+    - windows
+  architectures:
+    - amd64
+    - arm64
+categories:
+  - workstation
+tags:
+  - developer-tools
+security:
+  requires_elevation: true
+  network_access: true
+  secret_inputs: []
+workflows:
+  - id: install
+    name: Install
+    description: Install and configure workstation tooling.
+    entrypoint: workflows/install.yaml

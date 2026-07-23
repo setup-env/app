@@ -1,0 +1,46 @@
+name: Module request
+description: Propose a new Setup Env module domain before implementation.
+title: "[Module request] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requests propose a domain; they do not grant catalog inclusion or trust.
+  - type: input
+    id: module-id
+    attributes:
+      label: Proposed module ID
+      description: Lowercase letters, numbers, and single hyphens.
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose and workflows
+      description: Describe the setup domain and expected workflows.
+    validations:
+      required: true
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Initial platform scope
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and permissions
+      description: Describe elevation, network access, secrets, and destructive behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Existing alternatives
+      description: Note overlapping Setup Env or third-party projects.

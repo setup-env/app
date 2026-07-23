@@ -22,5 +22,26 @@ security considerations.
 
 Module proposals should include maintainers, trust level, target platforms,
 workflows, dependencies, permission requirements, and test strategy. The
-module specification remains provisional until the module-engine milestones
-validate it.
+manifest v1 contract is defined in [docs/module-model.md](docs/module-model.md).
+
+## Registering a module
+
+Module registration uses a pull request to this repository. Contributors add
+one valid catalog entry and provide a public repository with a valid
+`setup-env.yaml`, documentation, and tests where applicable. Automated
+validation must pass and a maintainer must approve the assigned trust level.
+
+Contributors may request `community` trust. They cannot assign themselves
+`verified` or `official`; those classifications require separate maintainer
+governance review. Follow
+[docs/module-contributions.md](docs/module-contributions.md).
+
+The recommended Git flow is:
+
+```text
+feature branch → pull request → validation → approval → merge to main
+```
+
+Recommended `main` protection requires at least one approval, successful CI,
+resolved conversations, and blocks force pushes and ordinary direct pushes.
+Administrator overrides should be exceptional and intentional.

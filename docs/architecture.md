@@ -12,7 +12,7 @@ server, Terraform, Helm, cloud, and network behavior must not be embedded in
 the application. This separation lets modules release at their own pace while
 the application maintains a stable compatibility contract.
 
-## Milestone 01 boundaries
+## Application foundation
 
 The initial CLI uses the Go standard library. Four commands do not justify a
 framework dependency, and command dispatch remains isolated in `internal/cli`
@@ -22,11 +22,14 @@ needs make it valuable.
 Package responsibilities are:
 
 - `internal/app`: orchestration between reusable services;
+- `internal/catalog`: authoritative catalog model, sources, filtering, and validation;
 - `internal/cli`: arguments, human output, JSON output, and actionable errors;
+- `internal/compatibility`: narrow semantic-version minimum checks;
 - `internal/config`: versioned, secret-free settings and OS-native location;
 - `internal/directory`: structural development/organization/repository context;
 - `internal/diagnostics`: safe tool, authentication-readiness, and write checks;
 - `internal/git`: Git repository and sanitized remote metadata inspection;
+- `internal/manifest`: strict YAML parsing and manifest v1 validation;
 - `internal/paths`: home and development-root resolution;
 - `internal/platform`: OS, distribution, architecture, user, home, and shell;
 - `internal/version`: build metadata.
@@ -34,12 +37,27 @@ Package responsibilities are:
 The detection packages use injected functions or interfaces where machine state
 would otherwise make tests brittle.
 
-## Future module and workflow engine
+The manifest parser uses `github.com/goccy/go-yaml` v1.19.2. YAML is a core
+public contract and is not supported by the Go standard library; this focused,
+maintained dependency provides strict unknown-field decoding without adding
+external module dependencies.
 
-A future versioned module manifest will identify a module, compatibility,
-workflows, supported platforms, inputs, dependencies, actions, permissions,
-artifacts, and verification metadata. A catalog will point to immutable module
-releases rather than executing an arbitrary default branch.
+## Manifest and catalog authority
+
+The versioned module manifest identifies a module, compatibility, supported
+platforms, security declarations, and workflow metadata. The app catalog is
+authoritative for listing, repository location, trust, and status. A module
+manifest is authoritative for capabilities, platform support, compatibility,
+workflows, and module metadata. Catalog governance wins for trust even if a
+third-party file makes a conflicting claim; strict parsing currently rejects a
+manifest `trust` field entirely.
+
+Milestone 02 embeds the repository catalog in the binary. Source interfaces
+leave room for future explicit local and verified cached catalogs. Proposed
+future precedence is explicit local, verified cache, then embedded. Only the
+embedded source is active now.
+
+## Future workflow engine
 
 The workflow engine will plan actions before execution, validate inputs and
 platform support, resolve dependencies, require declared permissions, support
@@ -56,7 +74,9 @@ The catalog will distinguish:
   reviewed;
 - **community** modules that meet the manifest contract without endorsement.
 
-Trust must be visible and must not silently escalate. Future downloads will use
+Trust is assigned only through review of the app catalog and cannot be
+self-declared by a module. Trust must be visible and must not silently escalate.
+Future downloads will use
 immutable versions, checksums, signed release metadata where practical,
 compatibility checks, and cache verification. Scripts and templates remain
 untrusted input until verified by policy.
@@ -71,6 +91,15 @@ Git and SSH configuration can reveal useful local capabilities but cannot
 enumerate all remote access. Future organization and repository discovery will
 use authenticated provider APIs—initially GitHub APIs through `gh`—without
 reading or storing token contents.
+
+## Awesome ecosystem list
+
+`setup-env/awesome-setup-env` is human-readable curation and may include
+official modules, community experiments, third-party projects, guides, and
+related tools. Its Markdown is never an execution or trust source. Inclusion in
+the Awesome list does not grant catalog inclusion, trust, compatibility, or
+installability. Future automation may generate parts of that list from the app
+catalog, but synchronization is outside Milestone 02.
 
 ## Desktop application
 

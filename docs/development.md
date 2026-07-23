@@ -3,6 +3,7 @@
 ## Requirements
 
 - Go 1.26; `go.mod` pins toolchain 1.26.5.
+- `github.com/goccy/go-yaml` v1.19.2, downloaded automatically by Go modules.
 - Git for repository-aware context and normal contribution workflows.
 - GitHub CLI only for authenticated GitHub operations; core local commands do
   not require it.
@@ -18,6 +19,8 @@ go vet ./...
 go test ./...
 go test -race ./...
 go build -o bin/setup-env ./cmd/setup-env
+go run ./cmd/setup-env module validate-catalog
+go run ./cmd/setup-env module validate examples/setup-env.yaml
 ```
 
 Race testing requires a supported C toolchain and runs on Linux CI. The regular
@@ -35,5 +38,8 @@ go build -ldflags "-X github.com/setup-env/app/internal/version.Version=v0.1.0 -
 - Inject machine state in tests; do not depend on a contributor's username,
   home, installed tools, credentials, or organization.
 - Never print credential command output.
+- Keep catalog entries, categories, and tags deterministically sorted.
+- Keep parsing, schema, semantics, and compatibility validation distinct.
+- Never accept module trust from a manifest; trust belongs to the app catalog.
 - Keep module-specific behavior in its module repository.
 - Do not describe proposed commands as implemented.

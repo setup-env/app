@@ -1,14 +1,15 @@
 # Roadmap
 
-## Milestone 01 — Application Foundation
+## Milestone 01 — Application Foundation (complete)
 
 Establish the Go module, initial CLI, environment and directory detection,
 configuration model, diagnostics, tests, CI, architecture, and governance.
 
-## Milestone 02 — Module Manifest and Catalog
+## Milestone 02 — Module Manifest and Official Catalog (complete)
 
-Validate a versioned manifest contract, catalog schema, compatibility rules,
-trust metadata, and module discovery interfaces.
+Define manifest v1, embed the authoritative official catalog, validate trust,
+status and compatibility, expose local module discovery commands, and document
+the contribution flow.
 
 ## Milestone 03 — Module Download, Cache, and Verification
 

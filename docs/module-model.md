@@ -1,14 +1,47 @@
-# Module Model
+# Module Manifest v1
 
-> Status: initial proposal. This specification is not implemented and will
-> change as Milestones 02–05 validate it against real modules.
+`setup-env.yaml` is the versioned machine-readable contract for one module
+repository. Milestone 02 validates manifest and workflow metadata but does not
+download, install, update, or execute modules.
 
-A module owns one setup domain and releases independently from the application.
-The application owns discovery, validation, download, verification, execution,
-and shared behavior. A module owns its workflows, scripts, templates, tests,
-and domain documentation.
+See the single maintained [reference manifest](../examples/setup-env.yaml).
+It represents `workstation` as a fixture and is not the live manifest of the
+module repository.
 
-Expected repository layout:
+## Fields
+
+Manifest v1 supports:
+
+- `schema_version`: must be `1`;
+- `id`: stable lowercase identifier using letters, numbers, and single hyphens;
+- `name` and `description`;
+- `repository.owner`, `repository.name`, and optional `issues_url`;
+- `version.source`: `github-release`, `git-tag`, or `manifest`;
+- `version.value`: required semantic version only for `manifest` source;
+- `publisher` and `license`;
+- optional `homepage` and `documentation` HTTP(S) URLs;
+- `minimum_app_version` in semantic `MAJOR.MINOR.PATCH` form;
+- supported `platforms.operating_systems` and `platforms.architectures`;
+- identifier-safe `categories` and optional `tags`;
+- non-authoritative security declarations for elevation, network access, and
+  named secret inputs;
+- workflow metadata with ID, name, description, and a relative YAML entrypoint
+  under `workflows/`;
+- optional `deprecated`, `replacement`, and `deprecation_notice`.
+
+Unknown fields are rejected so mistakes and unsupported future contracts are
+not silently accepted. Validation separates YAML parsing, schema-version
+validation, semantic validation, and compatibility evaluation. Multiple
+semantic failures are returned together where practical.
+
+## Trust is not a manifest field
+
+Modules cannot declare themselves `official`, `verified`, or `community`.
+Trust is assigned by maintainers in `catalog/modules.yaml`. A manifest that
+adds a `trust` field fails strict parsing. Security requirements describe what
+a workflow may eventually need; they do not endorse its publisher or code.
+
+## Repository layout
 
 ```text
 <module>/
@@ -20,30 +53,24 @@ Expected repository layout:
 └── tests/
 ```
 
-The future manifest is expected to declare:
+Workflow files are declarations only in Milestone 02. The future workflow
+engine will define their executable contract, inputs, actions, permissions,
+idempotency, dry-run, cancellation, redaction, and audit behavior.
 
-- schema and module versions;
-- identity, description, maintainers, and trust metadata;
-- application compatibility;
-- supported operating systems, distributions, and architectures;
-- workflows, typed inputs, outputs, and dependencies;
-- required tools, privileges, permissions, network access, and secrets;
-- checksums or references to verified release artifacts.
+## Compatibility
 
-Workflows should describe intent and use shared actions where possible. Scripts
-remain appropriate for domain behavior that cannot be expressed safely in a
-portable action. Every workflow must support validation before mutation, expose
-destructive behavior, and define idempotency and rollback expectations.
+The app compares its released semantic version with
+`minimum_app_version`. Results are:
 
-Conceptual future commands include:
+- `compatible`: app version meets the minimum;
+- `incompatible`: app version is below the minimum;
+- `unknown`: the app is a development build or version data is incomplete.
 
-```text
-setup-env module list
-setup-env module info <module>
-setup-env module install <module>
-setup-env module update <module>
-setup-env workflow list <module>
-setup-env run <module> <workflow>
-```
+This is deliberately not a dependency solver and does not evaluate
+module-to-module dependencies.
 
-These commands are not implemented in Milestone 01.
+## Catalog relationship
+
+The catalog locates and classifies modules; the manifest describes them. The
+catalog wins for listing, repository, trust, and status. The manifest wins for
+capabilities, platforms, compatibility, workflows, and module metadata.

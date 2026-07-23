@@ -12,15 +12,15 @@ in independently versioned module repositories such as
 [`setup-env/helm`](https://github.com/setup-env/helm). Workstation setup is one
 module; it is not the main product.
 
-## Milestone 01
+## Current foundation
 
-Milestone 01 establishes the application foundation:
+Milestone 01 established the application foundation. Milestone 02 adds:
 
-- a small, dependency-free CLI;
-- cross-platform platform and directory-context detection;
-- safe Git and GitHub CLI readiness diagnostics;
-- a versioned, secret-free configuration model;
-- tested package boundaries and cross-platform CI.
+- a versioned `setup-env.yaml` module manifest;
+- an embedded authoritative module catalog;
+- explicit `official`, `verified`, and `community` trust classifications;
+- honest module statuses and minimum-app compatibility checks;
+- local catalog inspection and manifest validation commands.
 
 The current commands are:
 
@@ -29,10 +29,27 @@ setup-env
 setup-env version
 setup-env info [--json]
 setup-env doctor [--json]
+setup-env module list [--json] [--trust <level>] [--status <status>] [--category <category>]
+setup-env module info <module> [--json]
+setup-env module validate <path> [--json]
 ```
 
-Running `setup-env` without arguments displays help. The `module`, `workflow`,
-and `run` commands are planned and are not implemented.
+Running `setup-env` without arguments displays help. Catalog discovery and
+local manifest validation are implemented. Module downloading, caching,
+installation, updates, and workflow execution are not implemented. A listed
+`planned` module is not runnable.
+
+## Module catalog
+
+[`catalog/modules.yaml`](catalog/modules.yaml) is the authoritative
+machine-readable catalog embedded in the binary. It controls listing,
+repository location, trust, and status. A module's `setup-env.yaml` controls its
+capabilities, platforms, compatibility, workflows, and descriptive metadata.
+
+[`setup-env/awesome-setup-env`](https://github.com/setup-env/awesome-setup-env)
+is a separate human-curated discovery list. Inclusion there does not grant
+catalog trust or installability, and the CLI never scrapes Markdown to discover
+or execute modules.
 
 ## Directory convention
 
@@ -75,8 +92,7 @@ Configuration never contains credentials or access tokens.
 
 ## Planned capabilities
 
-Future milestones will define and validate the module manifest and catalog,
-download and verify module releases, execute workflows with dry-run and
+Future milestones will download and verify module releases, execute workflows with dry-run and
 permission controls, publish cross-platform installers, and reuse the Go engine
 in a desktop application. Organization discovery will use authenticated
 provider APIs such as GitHub's API through `gh`; local credentials alone cannot
@@ -92,8 +108,9 @@ describe its domain, workflows, supported operating systems, required
 permissions, maintainers, and why it should be official, verified, or
 community-maintained.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and the provisional
-[module model](docs/module-model.md) before contributing.
+Read [CONTRIBUTING.md](CONTRIBUTING.md), the
+[module model](docs/module-model.md), and the
+[module contribution process](docs/module-contributions.md) before contributing.
 
 ## License
 

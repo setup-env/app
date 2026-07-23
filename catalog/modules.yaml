@@ -1,0 +1,132 @@
+schema_version: 1
+modules:
+  - id: ansible
+    name: Ansible
+    description: Configure Ansible projects and environments.
+    repository: setup-env/ansible
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - configuration-management
+    tags:
+      - automation
+    version_policy: github-release
+    publisher: Setup Env
+  - id: aws
+    name: AWS
+    description: Configure Amazon Web Services environments and tooling.
+    repository: setup-env/aws
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - cloud
+    tags:
+      - aws
+    version_policy: github-release
+    publisher: Setup Env
+  - id: azure
+    name: Azure
+    description: Configure Microsoft Azure environments and tooling.
+    repository: setup-env/azure
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - cloud
+    tags:
+      - azure
+    version_policy: github-release
+    publisher: Setup Env
+  - id: gcp
+    name: Google Cloud
+    description: Configure Google Cloud environments and tooling.
+    repository: setup-env/gcp
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - cloud
+    tags:
+      - gcp
+    version_policy: github-release
+    publisher: Setup Env
+  - id: helm
+    name: Helm
+    description: Scaffold and manage Helm chart projects.
+    repository: setup-env/helm
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - containers
+    tags:
+      - kubernetes
+    version_policy: github-release
+    publisher: Setup Env
+  - id: mikrotik
+    name: MikroTik
+    description: Configure MikroTik networking environments and tooling.
+    repository: setup-env/mikrotik
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - networking
+    tags:
+      - routeros
+    version_policy: github-release
+    publisher: Setup Env
+  - id: openclaw
+    name: OpenClaw
+    description: Configure OpenClaw environments and supporting tooling.
+    repository: setup-env/openclaw
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - automation
+    tags:
+      - openclaw
+    version_policy: github-release
+    publisher: Setup Env
+  - id: server
+    name: Server
+    description: Configure cross-platform server environments.
+    repository: setup-env/server
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - infrastructure
+    tags:
+      - server
+    version_policy: github-release
+    publisher: Setup Env
+  - id: terraform
+    name: Terraform
+    description: Scaffold and configure Terraform projects and tooling.
+    repository: setup-env/terraform
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - infrastructure-as-code
+    tags:
+      - terraform
+    version_policy: github-release
+    publisher: Setup Env
+  - id: workstation
+    name: Workstation
+    description: Configure cross-platform developer workstations.
+    repository: setup-env/workstation
+    manifest: setup-env.yaml
+    trust: official
+    status: planned
+    categories:
+      - workstation
+    tags:
+      - developer-tools
+    version_policy: github-release
+    publisher: Setup Env

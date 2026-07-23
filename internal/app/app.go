@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/setup-env/app/internal/catalog"
 	"github.com/setup-env/app/internal/config"
 	"github.com/setup-env/app/internal/diagnostics"
 	"github.com/setup-env/app/internal/directory"
@@ -28,6 +29,7 @@ type Service struct {
 	GitInspector     gitinspect.Inspector
 	Getwd            func() (string, error)
 	Commands         diagnostics.CommandRunner
+	CatalogSource    catalog.Source
 }
 
 func DefaultService() Service {
@@ -38,6 +40,7 @@ func DefaultService() Service {
 		GitInspector:     gitinspect.DefaultInspector(),
 		Getwd:            os.Getwd,
 		Commands:         diagnostics.OSCommandRunner{},
+		CatalogSource:    catalog.EmbeddedSource{},
 	}
 }
 

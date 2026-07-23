@@ -1,4 +1,4 @@
-.PHONY: build test race vet fmt check
+.PHONY: build test race vet fmt validate check
 
 build:
 	go build -o bin/setup-env ./cmd/setup-env
@@ -15,4 +15,8 @@ vet:
 fmt:
 	go fmt ./...
 
-check: fmt vet test build
+validate:
+	go run ./cmd/setup-env module validate-catalog
+	go run ./cmd/setup-env module validate examples/setup-env.yaml
+
+check: fmt vet test validate build

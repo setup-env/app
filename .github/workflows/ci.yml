@@ -42,6 +42,11 @@ jobs:
       - name: Test
         run: go test ./...
 
+      - name: Validate catalog and reference manifest
+        run: |
+          go run ./cmd/setup-env module validate-catalog
+          go run ./cmd/setup-env module validate examples/setup-env.yaml
+
       - name: Build
         run: go build ./cmd/setup-env
 
