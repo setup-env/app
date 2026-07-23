@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "development_root": "",
+  "clone_protocol": "https",
+  "known_organizations": [
+    "setup-env"
+  ],
+  "settings": {
+    "check_updates": true
+  }
+}
