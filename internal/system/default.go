@@ -14,7 +14,10 @@ func DefaultSections(additional ...SectionCollector) []SectionCollector {
 		},
 		MemoryCollector{Source: GopsutilMemorySource{}},
 		FilesystemCollector{Source: GopsutilDiskSource{}},
-		NetworkCollector{Source: StandardNetworkSource{}},
+		NetworkCollector{
+			Source:        StandardNetworkSource{},
+			CounterSource: GopsutilNetworkCounterSource{},
+		},
 	}
 	return append(sections, additional...)
 }

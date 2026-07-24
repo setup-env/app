@@ -9,13 +9,18 @@ import (
 
 func TestSnapshotJSONContract(t *testing.T) {
 	timestamp := time.Date(2026, 7, 24, 1, 30, 0, 0, time.FixedZone("SAST", 7200))
+	bytesReceived := uint64(1024)
 	snapshot := Snapshot{
 		SchemaVersion: SnapshotSchemaVersion,
 		Timestamp:     timestamp,
 		TimeZone:      TimeZone{Name: "SAST", UTCOffsetSeconds: 7200},
 		Filesystems:   []Filesystem{},
-		Networks:      []NetworkInterface{},
-		Warnings:      []Warning{},
+		Networks: []NetworkInterface{{
+			Name:          "eth0",
+			Addresses:     []NetworkAddress{},
+			BytesReceived: &bytesReceived,
+		}},
+		Warnings: []Warning{},
 	}
 	data, err := json.Marshal(snapshot)
 	if err != nil {
@@ -30,6 +35,10 @@ func TestSnapshotJSONContract(t *testing.T) {
 	}
 	if !strings.Contains(text, `"total_bytes":null`) {
 		t.Fatalf("unavailable numeric value is not null: %s", text)
+	}
+	if !strings.Contains(text, `"bytes_received":1024`) ||
+		!strings.Contains(text, `"bytes_transmitted":null`) {
+		t.Fatalf("network counters do not preserve numeric/null semantics: %s", text)
 	}
 	if strings.Contains(text, "\x1b") {
 		t.Fatalf("JSON contains ANSI escape: %q", text)

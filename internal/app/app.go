@@ -7,6 +7,7 @@ import (
 
 	"github.com/setup-env/app/internal/catalog"
 	"github.com/setup-env/app/internal/config"
+	"github.com/setup-env/app/internal/dashboard"
 	"github.com/setup-env/app/internal/diagnostics"
 	"github.com/setup-env/app/internal/directory"
 	gitinspect "github.com/setup-env/app/internal/git"
@@ -32,6 +33,7 @@ type Service struct {
 	Commands         diagnostics.CommandRunner
 	CatalogSource    catalog.Source
 	SystemCollector  system.SnapshotCollector
+	DashboardSource  dashboard.Source
 }
 
 func DefaultService() Service {

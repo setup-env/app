@@ -9,6 +9,7 @@ import (
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/mem"
+	gopsutilnet "github.com/shirou/gopsutil/v4/net"
 )
 
 type HostSource interface {
@@ -79,4 +80,14 @@ func (StandardNetworkSource) Interfaces() ([]net.Interface, error) {
 
 func (StandardNetworkSource) Addrs(value net.Interface) ([]net.Addr, error) {
 	return value.Addrs()
+}
+
+type NetworkCounterSource interface {
+	IOCounters(context.Context, bool) ([]gopsutilnet.IOCountersStat, error)
+}
+
+type GopsutilNetworkCounterSource struct{}
+
+func (GopsutilNetworkCounterSource) IOCounters(ctx context.Context, perInterface bool) ([]gopsutilnet.IOCountersStat, error) {
+	return gopsutilnet.IOCountersWithContext(ctx, perInterface)
 }

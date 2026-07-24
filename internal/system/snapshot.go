@@ -87,11 +87,15 @@ type Filesystem struct {
 }
 
 type NetworkInterface struct {
-	Name       string           `json:"name"`
-	Status     string           `json:"status"`
-	MACAddress string           `json:"mac_address,omitempty"`
-	Loopback   bool             `json:"loopback"`
-	Addresses  []NetworkAddress `json:"addresses"`
+	Name               string           `json:"name"`
+	Status             string           `json:"status"`
+	MACAddress         string           `json:"mac_address,omitempty"`
+	Loopback           bool             `json:"loopback"`
+	Addresses          []NetworkAddress `json:"addresses"`
+	BytesReceived      *uint64          `json:"bytes_received"`
+	BytesTransmitted   *uint64          `json:"bytes_transmitted"`
+	PacketsReceived    *uint64          `json:"packets_received"`
+	PacketsTransmitted *uint64          `json:"packets_transmitted"`
 }
 
 type NetworkAddress struct {

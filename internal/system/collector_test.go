@@ -66,7 +66,7 @@ func TestHealthUsesDiagnosticFailures(t *testing.T) {
 			{Name: "development-root", Status: diagnostics.StatusFail},
 		}},
 	}
-	finalizeHealth(&snapshot)
+	FinalizeHealth(&snapshot)
 	if snapshot.Diagnostics.Health != HealthUnhealthy || snapshot.Diagnostics.FailureCount != 1 {
 		t.Fatalf("health = %#v", snapshot.Diagnostics)
 	}

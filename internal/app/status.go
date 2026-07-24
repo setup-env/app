@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/setup-env/app/internal/dashboard"
 	"github.com/setup-env/app/internal/diagnostics"
 	"github.com/setup-env/app/internal/system"
 	"github.com/setup-env/app/internal/version"
@@ -18,6 +20,104 @@ func (s Service) Status(ctx context.Context) (system.Snapshot, error) {
 		Sections: system.DefaultSections(DevelopmentCollector{Service: s}),
 	}
 	return collector.Collect(ctx)
+}
+
+func (s Service) Dashboard() dashboard.Source {
+	if s.DashboardSource != nil {
+		return s.DashboardSource
+	}
+	return LiveCollector{Service: s}
+}
+
+type LiveCollector struct {
+	Service Service
+}
+
+func (c LiveCollector) Initial(ctx context.Context) (system.Snapshot, error) {
+	return c.Service.Status(ctx)
+}
+
+func (c LiveCollector) Refresh(ctx context.Context, request dashboard.RefreshRequest) (system.Snapshot, error) {
+	sections := []system.SectionCollector{
+		system.CPUCollector{
+			Source:         system.GopsutilCPUSource{},
+			SampleDuration: system.DefaultCPUSampleDuration,
+		},
+		system.MemoryCollector{Source: system.GopsutilMemorySource{}},
+		system.NetworkCollector{
+			Source:        system.StandardNetworkSource{},
+			CounterSource: system.GopsutilNetworkCounterSource{},
+		},
+	}
+	if request.IncludeFilesystems {
+		sections = append(sections, system.FilesystemCollector{Source: system.GopsutilDiskSource{}})
+	}
+	if request.IncludeDiagnostics {
+		sections = append(sections, DevelopmentCollector{Service: c.Service})
+	}
+	fresh, collectErr := (system.Collector{
+		Now:      func() time.Time { return request.CollectedAt },
+		Sections: sections,
+	}).Collect(ctx)
+
+	result := request.Previous
+	result.Timestamp = fresh.Timestamp
+	result.TimeZone = fresh.TimeZone
+	result.Warnings = fresh.Warnings
+	result.CPU = mergeCPU(result.CPU, fresh.CPU)
+	result.Memory = mergeMemory(result.Memory, fresh.Memory)
+	result.Networks = fresh.Networks
+	if request.IncludeFilesystems {
+		result.Filesystems = fresh.Filesystems
+	}
+	if request.IncludeDiagnostics {
+		result.Development = fresh.Development
+		result.Diagnostics.Checks = fresh.Diagnostics.Checks
+	}
+	if result.Host.UptimeSeconds != nil {
+		uptime := *result.Host.UptimeSeconds
+		if elapsed := request.CollectedAt.Sub(request.Previous.Timestamp); elapsed > 0 {
+			uptime += uint64(elapsed / time.Second)
+		}
+		result.Host.UptimeSeconds = &uptime
+	}
+	system.FinalizeHealth(&result)
+	return result, collectErr
+}
+
+func mergeCPU(previous, current system.CPU) system.CPU {
+	if current.Model != "" {
+		previous.Model = current.Model
+	}
+	if current.PhysicalCores != nil {
+		previous.PhysicalCores = current.PhysicalCores
+	}
+	if current.LogicalCPUs != nil {
+		previous.LogicalCPUs = current.LogicalCPUs
+	}
+	if current.UtilizationPercent != nil {
+		previous.UtilizationPercent = current.UtilizationPercent
+	}
+	if current.SampleDurationMillis > 0 {
+		previous.SampleDurationMillis = current.SampleDurationMillis
+	}
+	return previous
+}
+
+func mergeMemory(previous, current system.Memory) system.Memory {
+	if current.TotalBytes != nil {
+		previous.TotalBytes = current.TotalBytes
+	}
+	if current.AvailableBytes != nil {
+		previous.AvailableBytes = current.AvailableBytes
+	}
+	if current.UsedBytes != nil {
+		previous.UsedBytes = current.UsedBytes
+	}
+	if current.UtilizationPercent != nil {
+		previous.UtilizationPercent = current.UtilizationPercent
+	}
+	return previous
 }
 
 type DevelopmentCollector struct {

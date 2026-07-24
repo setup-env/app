@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/setup-env/app/internal/app"
 	"github.com/setup-env/app/internal/catalog"
 	"github.com/setup-env/app/internal/config"
+	"github.com/setup-env/app/internal/dashboard"
 	"github.com/setup-env/app/internal/paths"
 	"github.com/setup-env/app/internal/system"
 )
@@ -21,6 +23,18 @@ import (
 type fakeSnapshotCollector struct {
 	snapshot system.Snapshot
 	err      error
+}
+
+type fakeDashboardSource struct {
+	snapshot system.Snapshot
+}
+
+func (f fakeDashboardSource) Initial(context.Context) (system.Snapshot, error) {
+	return f.snapshot, nil
+}
+
+func (f fakeDashboardSource) Refresh(context.Context, dashboard.RefreshRequest) (system.Snapshot, error) {
+	return f.snapshot, nil
 }
 
 func (f fakeSnapshotCollector) Collect(context.Context) (system.Snapshot, error) {
@@ -45,6 +59,97 @@ func TestExplicitHelpStillDisplaysHelp(t *testing.T) {
 	}
 	if !strings.Contains(output.String(), "setup-env <command>") {
 		t.Fatalf("help output = %q", output.String())
+	}
+}
+
+func TestNoArgumentsStartsDashboardWhenInteractive(t *testing.T) {
+	var output bytes.Buffer
+	called := false
+	service := app.Service{DashboardSource: fakeDashboardSource{snapshot: testSnapshot()}}
+	runner := func(context.Context, io.Reader, io.Writer, dashboard.Source, dashboard.RunOptions) error {
+		called = true
+		return nil
+	}
+	err := runWithRuntime(
+		context.Background(),
+		nil,
+		strings.NewReader(""),
+		&output,
+		&output,
+		service,
+		func(io.Reader, io.Writer) bool { return true },
+		runner,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !called || output.Len() != 0 {
+		t.Fatalf("called = %t, output = %q", called, output.String())
+	}
+}
+
+func TestNoArgumentsFallsBackWhenDashboardCannotStart(t *testing.T) {
+	var output bytes.Buffer
+	service := app.Service{SystemCollector: fakeSnapshotCollector{snapshot: testSnapshot()}}
+	runner := func(context.Context, io.Reader, io.Writer, dashboard.Source, dashboard.RunOptions) error {
+		return errors.New("terminal initialization failed")
+	}
+	err := runWithRuntime(
+		context.Background(),
+		nil,
+		strings.NewReader(""),
+		&output,
+		&output,
+		service,
+		func(io.Reader, io.Writer) bool { return true },
+		runner,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output.String(), "SETUP ENV SYSTEM STATUS") ||
+		strings.Contains(output.String(), "\x1b") {
+		t.Fatalf("fallback output = %q", output.String())
+	}
+}
+
+func TestNoArgumentsDoesNotFallbackAfterContextCancellation(t *testing.T) {
+	var output bytes.Buffer
+	ctx, cancel := context.WithCancel(context.Background())
+	service := app.Service{SystemCollector: fakeSnapshotCollector{snapshot: testSnapshot()}}
+	runner := func(context.Context, io.Reader, io.Writer, dashboard.Source, dashboard.RunOptions) error {
+		cancel()
+		return context.Canceled
+	}
+	err := runWithRuntime(
+		ctx,
+		nil,
+		strings.NewReader(""),
+		&output,
+		&output,
+		service,
+		func(io.Reader, io.Writer) bool { return true },
+		runner,
+	)
+	if !errors.Is(err, context.Canceled) || output.Len() != 0 {
+		t.Fatalf("error = %v, output = %q", err, output.String())
+	}
+}
+
+func TestExplicitDashboardRequiresInteractiveTerminal(t *testing.T) {
+	var output bytes.Buffer
+	err := runWithRuntime(
+		context.Background(),
+		[]string{"dashboard"},
+		strings.NewReader(""),
+		&output,
+		&output,
+		app.Service{},
+		func(io.Reader, io.Writer) bool { return false },
+		dashboard.Run,
+	)
+	if err == nil || !strings.Contains(err.Error(), "setup-env status") {
+		t.Fatalf("error = %v", err)
 	}
 }
 
