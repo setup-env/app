@@ -96,7 +96,15 @@ func runWithRuntime(
 			return fmt.Errorf("version does not accept arguments; run 'setup-env help'")
 		}
 		current := version.Current()
-		_, err := fmt.Fprintf(stdout, "setup-env %s (commit %s, built %s, %s)\n", current.Version, current.Commit, current.BuildDate, current.GoVersion)
+		_, err := fmt.Fprintf(
+			stdout,
+			"setup-env %s (commit %s, built %s, dirty %t, %s)\n",
+			current.Version,
+			current.Commit,
+			current.BuildDate,
+			current.Dirty,
+			current.GoVersion,
+		)
 		return err
 	case "info":
 		jsonOutput, err := parseOutputArguments(args[1:])
