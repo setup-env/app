@@ -52,12 +52,19 @@ governance review. Follow
 The recommended Git flow is:
 
 ```text
-feature branch → pull request → validation → approval → merge to main
+feature branch → pull request → validation → squash merge to main
 ```
 
-Recommended `main` protection requires at least one approval, successful CI,
-resolved conversations, and blocks force pushes and ordinary direct pushes.
-Administrator overrides should be exceptional and intentional.
+The active `Protect main` repository ruleset requires a pull request, all
+required CI jobs, resolved conversations, squash merging, and linear history.
+It blocks ordinary direct pushes, force pushes, and deletion. Because the
+repository currently has one direct maintainer, the required approval count is
+zero; requiring that maintainer to approve their own pull request would be
+unsatisfiable. New commits still dismiss any recorded approvals.
+
+Repository administrators have a pull-request-only bypass for emergency
+maintenance. It preserves a PR and audit trail, does not permit direct pushes
+to `main`, and must not be used for routine feature or dependency work.
 
 Release and installer changes must preserve deterministic archive names and
 contents, SHA-256 verification before execution, user-scoped defaults, rollback
