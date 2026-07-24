@@ -1,3 +1,11 @@
+<p align="center">
+  <img
+    src="docs/assets/setup-env-banner.png"
+    alt="Setup Env — cross-platform environment setup, system monitoring, and reproducible configuration"
+    width="1280"
+  />
+</p>
+
 # Setup Env
 
 Setup Env is a cross-platform terminal application for inspecting and preparing
