@@ -69,8 +69,11 @@ jobs:
           if ($defaultOutput.Contains([char]27)) {
             throw "redirected no-argument output contains ANSI escapes"
           }
+          $nativeErrorPreference = $PSNativeCommandUseErrorActionPreference
+          $PSNativeCommandUseErrorActionPreference = $false
           $dashboardOutput = & go run ./cmd/setup-env dashboard 2>&1
           $dashboardExitCode = $LASTEXITCODE
+          $PSNativeCommandUseErrorActionPreference = $nativeErrorPreference
           $dashboardText = $dashboardOutput | Out-String
           if ($dashboardExitCode -eq 0) {
             throw "explicit dashboard unexpectedly succeeded without a TTY"
@@ -78,6 +81,7 @@ jobs:
           if (-not $dashboardText.Contains("requires an interactive input and output terminal")) {
             throw "explicit dashboard non-TTY error was not actionable"
           }
+          $global:LASTEXITCODE = 0
 
       - name: Build
         run: go build ./cmd/setup-env
