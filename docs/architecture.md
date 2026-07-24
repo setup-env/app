@@ -32,6 +32,8 @@ Package responsibilities are:
 - `internal/manifest`: strict YAML parsing and manifest v1 validation;
 - `internal/paths`: home and development-root resolution;
 - `internal/platform`: OS, distribution, architecture, user, home, and shell;
+- `internal/status`: deterministic human formatting and static status rendering;
+- `internal/system`: snapshot contract, section collectors, warnings, and health;
 - `internal/version`: build metadata.
 
 The detection packages use injected functions or interfaces where machine state
@@ -41,6 +43,44 @@ The manifest parser uses `github.com/goccy/go-yaml` v1.19.2. YAML is a core
 public contract and is not supported by the Go standard library; this focused,
 maintained dependency provides strict unknown-field decoding without adding
 external module dependencies.
+
+System metrics use `github.com/shirou/gopsutil/v4` v4.26.6. It is one focused,
+actively maintained, cross-platform dependency for host, CPU, memory, and disk
+information and avoids fragile operating-system command parsing. Network
+interface collection uses Go's standard library. The dependency does not
+require CGO for supported Windows, macOS, and Linux targets. Its transitive
+modules are platform adapters selected by Go build constraints: Windows
+WMI/OLE, Darwin `purego`, AIX `perfstat`, Plan 9 statistics, Unix system
+configuration helpers, and `golang.org/x/sys`. No terminal UI framework was
+added.
+
+## System snapshot
+
+`internal/system.Snapshot` is the presentation-independent, point-in-time data
+contract for the CLI, future live dashboard, and eventual desktop application.
+It includes schema version 1, an RFC 3339 timestamp when encoded as JSON,
+explicit byte and percentage fields, development diagnostics, structured
+warnings, and overall health.
+
+Individual section collectors accept a context and update a snapshot. The
+composite collector runs them independently and returns partial data when a
+section fails. Optional numbers use pointers: JSON `null` and human
+`unavailable` are different from a legitimate zero. The only total failure is
+a cancelled collection or a snapshot for which every section failed.
+
+Collection and rendering are separate. `internal/status` owns static human
+formatting; the JSON encoder serializes the typed model directly. Neither
+collector emits ANSI terminal sequences. CPU utilization uses a 500 ms sample
+to balance responsiveness and usefulness.
+
+User-relevant filesystem filtering excludes known pseudo filesystems and
+internal mount trees (`/dev`, `/proc`, `/run`, `/snap`, `/sys`,
+`/System/Volumes`, and common container storage), removes duplicates, and keeps
+Windows drive roots. Network collection reads only local interface metadata and
+unicast addresses; it makes no public-IP or other external request.
+
+Milestone 04 will repeatedly invoke these collectors for live presentation. It
+must not move collection rules into the terminal renderer.
 
 ## Manifest and catalog authority
 

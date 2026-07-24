@@ -18,5 +18,7 @@ fmt:
 validate:
 	go run ./cmd/setup-env module validate-catalog
 	go run ./cmd/setup-env module validate examples/setup-env.yaml
+	go run ./cmd/setup-env status
+	go run ./cmd/setup-env status --json
 
 check: fmt vet test validate build
