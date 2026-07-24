@@ -44,6 +44,17 @@ func TestRunReportsToolReadinessWithoutSecrets(t *testing.T) {
 	if !report.Ready {
 		t.Fatalf("Run() = %#v, want ready", report)
 	}
+	if !report.Details.Git.Available || report.Details.Git.Version != "git version 2.50.0" {
+		t.Fatalf("Git details = %#v", report.Details.Git)
+	}
+	if !report.Details.GitHubCLI.Available ||
+		report.Details.GitHubAuthenticated == nil ||
+		!*report.Details.GitHubAuthenticated {
+		t.Fatalf("GitHub details = %#v", report.Details)
+	}
+	if !report.Details.DevelopmentRoot.Exists || !report.Details.DevelopmentRoot.Writable {
+		t.Fatalf("development-root details = %#v", report.Details.DevelopmentRoot)
+	}
 	for _, check := range report.Checks {
 		if check.Name == "github-auth" && check.Message != "GitHub CLI authentication appears configured" {
 			t.Fatalf("authentication message exposed command output: %q", check.Message)
@@ -56,7 +67,7 @@ func TestDevelopmentRootFailure(t *testing.T) {
 	if err := os.WriteFile(file, []byte("x"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	check := checkDevelopmentRoot(file)
+	check, _ := checkDevelopmentRoot(file)
 	if check.Status != StatusFail {
 		t.Fatalf("status = %q, want %q", check.Status, StatusFail)
 	}

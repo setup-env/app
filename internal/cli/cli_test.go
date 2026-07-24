@@ -4,24 +4,71 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/setup-env/app/internal/app"
 	"github.com/setup-env/app/internal/catalog"
 	"github.com/setup-env/app/internal/config"
 	"github.com/setup-env/app/internal/paths"
+	"github.com/setup-env/app/internal/system"
 )
 
-func TestNoArgumentsDisplaysHelp(t *testing.T) {
+type fakeSnapshotCollector struct {
+	snapshot system.Snapshot
+	err      error
+}
+
+func (f fakeSnapshotCollector) Collect(context.Context) (system.Snapshot, error) {
+	return f.snapshot, f.err
+}
+
+func TestNoArgumentsDisplaysStaticStatus(t *testing.T) {
 	var output bytes.Buffer
-	if err := run(context.Background(), nil, &output, &output, app.Service{}); err != nil {
+	service := app.Service{SystemCollector: fakeSnapshotCollector{snapshot: testSnapshot()}}
+	if err := run(context.Background(), nil, &output, &output, service); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output.String(), "SETUP ENV SYSTEM STATUS") {
+		t.Fatalf("status output = %q", output.String())
+	}
+}
+
+func TestExplicitHelpStillDisplaysHelp(t *testing.T) {
+	var output bytes.Buffer
+	if err := run(context.Background(), []string{"--help"}, &output, &output, app.Service{}); err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(output.String(), "setup-env <command>") {
 		t.Fatalf("help output = %q", output.String())
+	}
+}
+
+func TestStatusJSON(t *testing.T) {
+	var output bytes.Buffer
+	service := app.Service{SystemCollector: fakeSnapshotCollector{snapshot: testSnapshot()}}
+	if err := run(context.Background(), []string{"status", "--json"}, &output, &output, service); err != nil {
+		t.Fatal(err)
+	}
+	var snapshot system.Snapshot
+	if err := json.Unmarshal(output.Bytes(), &snapshot); err != nil {
+		t.Fatalf("status JSON is invalid: %v\n%s", err, output.String())
+	}
+	if snapshot.SchemaVersion != system.SnapshotSchemaVersion || strings.Contains(output.String(), "\x1b") {
+		t.Fatalf("status JSON = %q", output.String())
+	}
+}
+
+func TestStatusCollectorFailureReturnsError(t *testing.T) {
+	var output bytes.Buffer
+	service := app.Service{SystemCollector: fakeSnapshotCollector{err: errors.New("all collectors failed")}}
+	err := run(context.Background(), []string{"status"}, &output, &output, service)
+	if err == nil || !strings.Contains(err.Error(), "collect system status") {
+		t.Fatalf("run() error = %v", err)
 	}
 }
 
@@ -132,6 +179,31 @@ func TestValidateCatalogCommand(t *testing.T) {
 	}
 	if !result.Valid || result.ModuleCount != 10 {
 		t.Fatalf("validation result = %#v", result)
+	}
+}
+
+func testSnapshot() system.Snapshot {
+	total := uint64(8 * 1024 * 1024 * 1024)
+	used := uint64(4 * 1024 * 1024 * 1024)
+	percent := 50.0
+	uptime := uint64(3661)
+	return system.Snapshot{
+		SchemaVersion: system.SnapshotSchemaVersion,
+		Timestamp:     time.Date(2026, 7, 24, 1, 30, 0, 0, time.FixedZone("SAST", 7200)),
+		TimeZone:      system.TimeZone{Name: "SAST", UTCOffsetSeconds: 7200},
+		Host:          system.Host{Hostname: "test-host", UptimeSeconds: &uptime},
+		OperatingSystem: system.OperatingSystem{
+			OS:           "linux",
+			DisplayName:  "Ubuntu",
+			Version:      "26.04",
+			Architecture: "amd64",
+		},
+		User:        system.User{Username: "tester", Home: "/home/tester"},
+		Memory:      system.Memory{TotalBytes: &total, UsedBytes: &used, AvailableBytes: &used, UtilizationPercent: &percent},
+		Filesystems: []system.Filesystem{},
+		Networks:    []system.NetworkInterface{},
+		Warnings:    []system.Warning{},
+		Diagnostics: system.DiagnosticSummary{Health: system.HealthHealthy},
 	}
 }
 

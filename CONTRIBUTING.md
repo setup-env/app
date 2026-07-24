@@ -16,6 +16,12 @@ and milestone can be agreed first.
    `go build ./cmd/setup-env`.
 5. Update public documentation when behavior or contracts change.
 
+Changes to system collection must preserve partial results, context
+cancellation, deterministic ordering, and the distinction between unavailable
+and zero. Add fixture-based tests rather than asserting the contributor's
+hardware, username, paths, credentials, network, or CPU count. Human rendering
+and JSON serialization must remain separate from metric collection.
+
 Commits should be focused and written in the imperative mood. Pull requests
 should explain the problem, approach, user impact, validation, permissions, and
 security considerations.

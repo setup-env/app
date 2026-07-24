@@ -47,6 +47,20 @@ jobs:
           go run ./cmd/setup-env module validate-catalog
           go run ./cmd/setup-env module validate examples/setup-env.yaml
 
+      - name: Smoke test status output
+        shell: pwsh
+        run: |
+          go run ./cmd/setup-env status
+          $statusPath = Join-Path $env:RUNNER_TEMP "setup-env-status.json"
+          go run ./cmd/setup-env status --json | Out-File -Encoding utf8 $statusPath
+          $status = Get-Content -Raw $statusPath | ConvertFrom-Json
+          if ($status.schema_version -ne 1) {
+            throw "unexpected status schema version"
+          }
+          if (-not $status.timestamp -or -not $status.diagnostics.health) {
+            throw "status JSON is missing required structural fields"
+          }
+
       - name: Build
         run: go build ./cmd/setup-env
 

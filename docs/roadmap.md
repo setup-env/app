@@ -1,42 +1,51 @@
 # Roadmap
 
-## Milestone 01 — Application Foundation (complete)
+## Completed
 
-Establish the Go module, initial CLI, environment and directory detection,
-configuration model, diagnostics, tests, CI, architecture, and governance.
+### Milestone 01 — Application Foundation
 
-## Milestone 02 — Module Manifest and Official Catalog (complete)
+Established the Go module, initial CLI, environment and directory detection,
+configuration, diagnostics, tests, CI, architecture, and governance.
 
-Define manifest v1, embed the authoritative official catalog, validate trust,
-status and compatibility, expose local module discovery commands, and document
-the contribution flow.
+### Milestone 02 — Module Manifest and Official Catalog
 
-## Milestone 03 — Module Download, Cache, and Verification
+Defined manifest v1, embedded the authoritative catalog, validated trust,
+status and compatibility, exposed local discovery commands, and documented the
+contribution flow.
 
-Resolve immutable releases, download and cache artifacts, verify checksums and
-release metadata, and implement safe update behavior.
+## Current
 
-## Milestone 04 — Workflow Execution Engine
+### Milestone 03 — System Snapshot and Status Output
 
-Plan and execute typed workflows with platform gates, dependency resolution,
-dry-run, permissions, secret redaction, cancellation, and execution history.
+Provide a reusable, partial-failure-tolerant system snapshot with deterministic
+human output and a versioned JSON contract. Add `setup-env status` and make a
+static snapshot the no-argument experience. See [Milestone 03](milestone-03.md).
 
-## Milestone 05 — Workstation Reference Module Integration
+## Next
 
-Integrate `setup-env/workstation` as a reference module without moving its
-domain logic into the application. Use it to validate the module contract.
+### Milestone 04 — Live Terminal Dashboard
 
-## Milestone 06 — Cross-Platform Releases and Installer
+Reuse the snapshot collectors in a lightweight, `htop`-inspired terminal
+display with live refresh, trends, keyboard controls, resizing, and clean
+terminal restoration. This milestone will not add process management.
 
-Produce verified Windows, macOS, and Linux artifacts, installation methods,
-upgrade paths, release notes, and rollback guidance.
+### Milestone 05 — Cross-Platform Releases and Bootstrap Installers
 
-## Future desktop application
+Publish verified Windows, macOS, and Linux artifacts with supported bootstrap
+installation, upgrade, release-note, and rollback paths.
 
-Build a native desktop experience that reuses the Go engine and typed services.
+### Milestone 06 — Module Download, Cache, and Verification
 
-## Future remote management platform
+Resolve immutable module releases, download and cache artifacts, verify
+checksums and release metadata, and implement safe update behavior.
 
-Design opt-in fleet orchestration only after the local security, permission,
-identity, audit, and workflow models have matured. Remote management is not in
-the current application scope.
+### Milestone 07 — Workstation Reference Module
+
+Integrate `setup-env/workstation` as a reference module without moving domain
+logic into the application, using it to validate the module contract.
+
+## Later work
+
+Workflow execution, a native desktop application, and opt-in remote management
+remain later initiatives. Remote management depends on mature local security,
+identity, permission, and audit models.

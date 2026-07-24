@@ -11,6 +11,7 @@ import (
 	"github.com/setup-env/app/internal/app"
 	"github.com/setup-env/app/internal/catalog"
 	"github.com/setup-env/app/internal/diagnostics"
+	statusoutput "github.com/setup-env/app/internal/status"
 	"github.com/setup-env/app/internal/version"
 )
 
@@ -20,13 +21,14 @@ Usage:
   setup-env <command> [options]
 
 Commands:
+  status    Show a point-in-time system status snapshot
   version   Print application version information
   info      Report platform and directory context
   doctor    Check local readiness for Setup Env operations
   module    Inspect and validate Setup Env modules
   help      Show this command overview
 
-Options for info and doctor:
+Options for status, info, and doctor:
   --json    Emit machine-readable JSON
 
 Module discovery and manifest validation are implemented. Downloading,
@@ -39,12 +41,21 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer, service app.Service) error {
 	_ = stderr
-	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
+	if len(args) == 0 {
+		return runStatus(ctx, false, stdout, service)
+	}
+	if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
 		_, err := io.WriteString(stdout, helpText)
 		return err
 	}
 
 	switch args[0] {
+	case "status":
+		jsonOutput, err := parseOutputArguments(args[1:])
+		if err != nil {
+			return fmt.Errorf("status: %w", err)
+		}
+		return runStatus(ctx, jsonOutput, stdout, service)
 	case "version":
 		if len(args) != 1 {
 			return fmt.Errorf("version does not accept arguments; run 'setup-env help'")
@@ -83,6 +94,17 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, service a
 	default:
 		return fmt.Errorf("unknown command %q; run 'setup-env help' for available commands", args[0])
 	}
+}
+
+func runStatus(ctx context.Context, jsonOutput bool, stdout io.Writer, service app.Service) error {
+	snapshot, err := service.Status(ctx)
+	if err != nil {
+		return fmt.Errorf("collect system status: %w", err)
+	}
+	if jsonOutput {
+		return writeJSON(stdout, snapshot)
+	}
+	return statusoutput.WriteHuman(stdout, snapshot)
 }
 
 func runModule(ctx context.Context, args []string, stdout io.Writer, service app.Service) error {
