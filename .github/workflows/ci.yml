@@ -60,9 +60,70 @@ jobs:
           if (-not $status.timestamp -or -not $status.diagnostics.health) {
             throw "status JSON is missing required structural fields"
           }
+          $defaultPath = Join-Path $env:RUNNER_TEMP "setup-env-default.txt"
+          go run ./cmd/setup-env | Out-File -Encoding utf8 $defaultPath
+          $defaultOutput = Get-Content -Raw $defaultPath
+          if (-not $defaultOutput.Contains("SETUP ENV SYSTEM STATUS")) {
+            throw "redirected no-argument execution did not use static status"
+          }
+          if ($defaultOutput.Contains([char]27)) {
+            throw "redirected no-argument output contains ANSI escapes"
+          }
+          $dashboardOutput = & go run ./cmd/setup-env dashboard 2>&1
+          $dashboardExitCode = $LASTEXITCODE
+          $dashboardText = $dashboardOutput | Out-String
+          if ($dashboardExitCode -eq 0) {
+            throw "explicit dashboard unexpectedly succeeded without a TTY"
+          }
+          if (-not $dashboardText.Contains("requires an interactive input and output terminal")) {
+            throw "explicit dashboard non-TTY error was not actionable"
+          }
 
       - name: Build
         run: go build ./cmd/setup-env
+
+  cross-build:
+    name: Cross-build (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: windows
+            goarch: amd64
+            suffix: .exe
+          - goos: windows
+            goarch: arm64
+            suffix: .exe
+          - goos: darwin
+            goarch: amd64
+            suffix: ""
+          - goos: darwin
+            goarch: arm64
+            suffix: ""
+          - goos: linux
+            goarch: amd64
+            suffix: ""
+          - goos: linux
+            goarch: arm64
+            suffix: ""
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cross-build
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -o "${{ runner.temp }}/setup-env-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}" ./cmd/setup-env
 
   race:
     name: Race test (Linux)

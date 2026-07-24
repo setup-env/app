@@ -20,6 +20,11 @@ go build -o bin/setup-env ./cmd/setup-env
 ./bin/setup-env
 ```
 
+Launching in a suitable interactive terminal opens the live dashboard. Press
+`q` to exit. Redirection, pipelines, and non-TTY sessions print one static
+snapshot; use `./bin/setup-env status --json` for automation. `TERM=dumb`
+deliberately disables dashboard startup.
+
 For a user-local installation:
 
 ```sh

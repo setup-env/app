@@ -1,9 +1,9 @@
 # Setup Env
 
-Setup Env is a cross-platform Go application for understanding and preparing a
-development environment. It currently provides a point-in-time system status,
-environment diagnostics, and a versioned catalog of Setup Env modules on
-Windows, Apple macOS, and Ubuntu Linux.
+Setup Env is a cross-platform terminal application for understanding and
+preparing a development environment. It provides a live system dashboard,
+static and machine-readable status, environment diagnostics, and a versioned
+catalog of Setup Env modules on Windows, Apple macOS, and Ubuntu Linux.
 
 ## Install
 
@@ -22,24 +22,65 @@ application from source using the platform guide:
 
 [Install Setup Env on Ubuntu Linux](docs/install/ubuntu.md)
 
-## System status
+## Dashboard and status
 
-Running `setup-env` with no arguments displays one static system snapshot.
-This is deliberately the default product experience; it does not refresh or
-take over the terminal. Help remains available through `setup-env --help` and
-`setup-env help`.
+Launch `setup-env` in an interactive terminal to open the live dashboard:
 
 ```sh
 setup-env
-setup-env status
-setup-env status --json
 ```
 
-The snapshot includes local date and time, host and operating-system identity,
-uptime, CPU, memory, user-relevant filesystems, local network interfaces,
-development-root context, Git and GitHub CLI readiness, diagnostics, and
-structured collection warnings. Unsupported or inaccessible metrics are shown
-as unavailable without suppressing the remaining snapshot.
+When input or output is redirected or piped, the same no-argument command
+prints one static, ANSI-free snapshot instead. Automation never enters the
+dashboard unexpectedly.
+
+```sh
+setup-env > status.txt
+setup-env | less
+setup-env status
+setup-env status --json
+setup-env dashboard
+```
+
+`setup-env dashboard` explicitly requires an interactive terminal and otherwise
+returns an actionable error. `setup-env status` is always static, while
+`setup-env status --json` emits schema-versioned machine data.
+If automatic dashboard initialization fails, the no-argument path restores the
+terminal and falls back to one static snapshot.
+
+Dashboard controls:
+
+```text
+q / Ctrl+C  quit
+r           refresh all metrics now
+p / Space   pause or resume
+?           toggle help
+```
+
+Representative wide-terminal layout:
+
+```text
++ Setup Env -------------------------------------------------------------+
+| example-host | Ubuntu 26.04 | amd64 | uptime 03:12:18 | 2026-07-24 ... |
++ CPU -------------------------------+ + Memory -------------------------+
+| 17.3%  physical 4  logical 8       | | 3.2 GiB / 7.3 GiB  43.8%       |
+| ...::--==++                         | | ...:::---===                    |
++ Filesystems -----------------------------------------------------------+
+| /          28.4 GiB / 118.0 GiB  24.1% [####----------------]         |
++ Network ---------------------------------------------------------------+
+| eth0  10.0.0.9  down 12.4 KiB/s  up 2.1 KiB/s                        |
++ Development and health -----------------------------------------------+
+| root ~/dev | Git available | GitHub CLI available | health healthy    |
++------------------------------------------------------------------------+
+ q quit | r refresh | p pause | ? help | live
+```
+
+The dashboard uses ASCII structure and remains useful without color. CPU,
+memory, and network refresh every second; filesystems every five seconds; and
+development diagnostics every sixty seconds. Individual metric failures
+remain visible as warnings without stopping the interface.
+
+Help remains available through `setup-env help` and `setup-env --help`.
 
 Other commands are:
 
@@ -59,16 +100,14 @@ A listed `planned` module is not runnable.
 
 ## Module catalog
 
-[`catalog/modules.yaml`](catalog/modules.yaml) is the authoritative
-machine-readable catalog embedded in the binary. It controls listing,
-repository location, trust, and status. A module's `setup-env.yaml` controls
-its capabilities, platforms, compatibility, workflows, and descriptive
-metadata.
+[`catalog/modules.yaml`](catalog/modules.yaml) is the authoritative embedded
+catalog. It controls listing, repository location, trust, and status. A
+module's `setup-env.yaml` controls capabilities, platforms, compatibility,
+workflows, and metadata.
 
 [`setup-env/awesome-setup-env`](https://github.com/setup-env/awesome-setup-env)
 is a separate human-curated list. Inclusion there does not grant catalog trust
-or installability, and the CLI never scrapes Markdown to discover or execute
-modules.
+or installability.
 
 ## Directory convention
 
@@ -78,8 +117,7 @@ Setup Env resolves paths dynamically under the current user's home directory:
 ~/dev/<organization>/<repository>
 ```
 
-Examples are `~/dev/setup-env/app` and `~/dev/setup-env/workstation`. No
-username, drive letter, or slash convention is hard-coded. See
+No username, drive letter, or slash convention is hard-coded. See
 [Directory conventions](docs/directory-conventions.md).
 
 ## Build and run
@@ -105,14 +143,12 @@ Configuration never contains credentials or access tokens.
 
 ## Roadmap and contributions
 
-The next iteration is a live terminal dashboard that reuses the snapshot
-collectors. Cross-platform releases, module retrieval, and workflow execution
+Cross-platform releases are next; module retrieval and workflow execution
 remain future work. See the [roadmap](docs/roadmap.md),
 [architecture](docs/architecture.md), and
-[Milestone 03 notes](docs/milestone-03.md).
+[Milestone 04 notes](docs/milestone-04.md).
 
-Propose module-contract changes here and domain behavior in the relevant
-module repository. Read [CONTRIBUTING.md](CONTRIBUTING.md), the
+Read [CONTRIBUTING.md](CONTRIBUTING.md), the
 [module model](docs/module-model.md), and the
 [module contribution process](docs/module-contributions.md).
 
