@@ -172,6 +172,12 @@ dynamically as:
 ~/dev/<organization>/<repository>
 ```
 
+This current application configuration is not the portable machine
+desired-state format. That versioned, exportable model—and explicit desktop,
+headless, server, platform, capability, and secret-reference boundaries—is
+planned for [Milestone 06](docs/roadmap.md). Setup Env does not yet download or
+execute module workflows.
+
 No username, drive letter, or slash convention is hard-coded. See
 [Directory conventions](docs/directory-conventions.md).
 

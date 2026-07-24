@@ -198,6 +198,24 @@ Secrets must never appear in configuration, logs, plans, error messages, or
 execution history. Provider integrations will rely on existing authenticated
 tools or secure credential stores and pass only the minimum required data.
 
+## Planned portable desired state
+
+The existing application `config.json` controls the application itself; it is
+not a portable declaration of machine state. Milestone 06 will define a
+separate, versioned desired-state format that can be validated, normalized,
+exported, imported, diffed, and planned without executing module workflows.
+Portable files may contain secret references but never secret values.
+
+Conditions must describe platform and capabilities rather than assume every
+machine is a desktop. Desktop, headless, and server profiles are distinct.
+Headless nodes such as `mgmt` must not plan GUI-only software such as Visual
+Studio Code, Docker Desktop, browsers, or desktop terminals.
+
+Module download and verification follow in Milestone 07. Local apply/state
+orchestration follows in Milestone 08, before Workstation becomes the first
+reference module in Milestone 09. See the [roadmap](roadmap.md) for the complete
+scope boundaries.
+
 ## Provider discovery
 
 Git and SSH configuration can reveal useful local capabilities but cannot
