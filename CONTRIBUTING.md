@@ -22,6 +22,13 @@ and zero. Add fixture-based tests rather than asserting the contributor's
 hardware, username, paths, credentials, network, or CPU count. Human rendering
 and JSON serialization must remain separate from metric collection.
 
+Dashboard changes must keep terminal behavior inside `internal/dashboard`,
+preserve non-interactive static fallback, bound all histories, avoid
+overlapping collectors, and honor context cancellation. Layout, rates,
+controls, and refresh scheduling should be tested with injected state rather
+than manual terminal timing. Verify that static and JSON output remain
+ANSI-free after every dashboard change.
+
 Commits should be focused and written in the imperative mood. Pull requests
 should explain the problem, approach, user impact, validation, permissions, and
 security considerations.

@@ -14,10 +14,9 @@ the application maintains a stable compatibility contract.
 
 ## Application foundation
 
-The initial CLI uses the Go standard library. Four commands do not justify a
-framework dependency, and command dispatch remains isolated in `internal/cli`
-so a library can be introduced later if real nesting, completion, or lifecycle
-needs make it valuable.
+Command parsing remains a small standard-library dispatcher in `internal/cli`.
+The live dashboard alone uses a terminal framework; static, JSON, diagnostic,
+and module commands do not initialize terminal state.
 
 Package responsibilities are:
 
@@ -28,6 +27,7 @@ Package responsibilities are:
 - `internal/config`: versioned, secret-free settings and OS-native location;
 - `internal/directory`: structural development/organization/repository context;
 - `internal/diagnostics`: safe tool, authentication-readiness, and write checks;
+- `internal/dashboard`: live state, scheduling, histories, rates, terminal lifecycle, and responsive views;
 - `internal/git`: Git repository and sanitized remote metadata inspection;
 - `internal/manifest`: strict YAML parsing and manifest v1 validation;
 - `internal/paths`: home and development-root resolution;
@@ -51,8 +51,15 @@ interface collection uses Go's standard library. The dependency does not
 require CGO for supported Windows, macOS, and Linux targets. Its transitive
 modules are platform adapters selected by Go build constraints: Windows
 WMI/OLE, Darwin `purego`, AIX `perfstat`, Plan 9 statistics, Unix system
-configuration helpers, and `golang.org/x/sys`. No terminal UI framework was
-added.
+configuration helpers, and `golang.org/x/sys`.
+
+The live terminal uses `charm.land/bubbletea/v2` v2.0.8 for its cross-platform
+event loop, alternate-screen lifecycle, keyboard input, resize events, and
+defensive terminal restoration. `github.com/charmbracelet/x/term` v0.2.2
+provides explicit stdin/stdout terminal detection. Both are pure Go and require
+no CGO. Bubble Tea's transitive graph provides terminal input, ANSI width,
+Unicode grapheme, cancellation, color-profile, terminfo, and Windows terminal
+adapters. Setup Env does not add Bubbles or a broad application framework.
 
 ## System snapshot
 
@@ -79,8 +86,55 @@ internal mount trees (`/dev`, `/proc`, `/run`, `/snap`, `/sys`,
 Windows drive roots. Network collection reads only local interface metadata and
 unicast addresses; it makes no public-IP or other external request.
 
-Milestone 04 will repeatedly invoke these collectors for live presentation. It
-must not move collection rules into the terminal renderer.
+The dashboard consumes this same model; collection rules never move into its
+view layer.
+
+## Live dashboard
+
+`internal/dashboard.Model` owns presentation state: the latest snapshot, clock,
+bounded CPU and memory histories, derived network rates, terminal dimensions,
+help/pause state, and refresh lifecycle. Its pure layout functions render ASCII
+structure for wide, compact, help, and minimum-size states. Dashboard styling
+does not require color, so `NO_COLOR` is naturally respected.
+
+The application gathers one full initial snapshot, including static platform
+metadata and development diagnostics. Subsequent refreshes are non-overlapping:
+
+- CPU, memory, local interface data, and network counters: every second;
+- filesystem capacity and inventory: every five seconds;
+- development-root and Git/GitHub diagnostics: every sixty seconds or on
+  forced refresh;
+- clock and resize query: every second.
+
+CPU collection retains the 500 ms utilization window. Stable host, OS, user,
+CPU-model, and tool metadata are merged forward rather than rediscovered each
+second. A forced `r` refresh includes all sections but still runs as one
+cancellable operation.
+
+Per-interface cumulative receive/transmit counters are an additive snapshot
+schema-v1 extension. Dashboard rates are derived only when the same interface
+has two available, nondecreasing counters and positive monotonic elapsed time.
+Counter reset, interface appearance/disappearance, and unavailable data yield
+`unavailable`, never a negative or fabricated rate. Rates remain dashboard
+state rather than snapshot fields because they describe a relationship between
+samples.
+
+Bubble Tea declaratively enters the alternate screen and restores raw mode,
+cursor, and screen state during handled exits. The dashboard passes a child
+context through refresh commands and cancels it when the program returns.
+Resize messages recompute layout without discarding histories; an explicit
+size request each second also covers platforms without `SIGWINCH`.
+
+Before dashboard initialization, both stdin and stdout must be terminals and
+`TERM` must not be `dumb`. No-argument non-interactive execution routes to the
+existing static renderer. Explicit `dashboard` mode instead returns an
+actionable error. Static and JSON output remain ANSI-free.
+If automatic dashboard initialization fails, the no-argument path falls back
+to the static renderer unless the application context was canceled.
+
+This separation also preserves future desktop reuse: the desktop application
+can consume snapshots and rates without importing terminal layout or lifecycle
+behavior.
 
 ## Manifest and catalog authority
 

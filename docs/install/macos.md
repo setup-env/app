@@ -17,6 +17,12 @@ go build -o bin/setup-env ./cmd/setup-env
 ./bin/setup-env
 ```
 
+Launching in Terminal, iTerm2, or another suitable interactive terminal opens
+the live dashboard. Press `q` to exit. Redirection and pipelines print one
+static snapshot; use `./bin/setup-env status --json` for automation. Set
+`TERM` to the terminal's correct value; `TERM=dumb` deliberately disables the
+dashboard.
+
 For a user-local installation:
 
 ```sh

@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/setup-env/app/internal/app"
 	"github.com/setup-env/app/internal/catalog"
+	"github.com/setup-env/app/internal/dashboard"
 	"github.com/setup-env/app/internal/diagnostics"
 	statusoutput "github.com/setup-env/app/internal/status"
 	"github.com/setup-env/app/internal/version"
@@ -21,6 +23,7 @@ Usage:
   setup-env <command> [options]
 
 Commands:
+  dashboard Start the live terminal dashboard
   status    Show a point-in-time system status snapshot
   version   Print application version information
   info      Report platform and directory context
@@ -36,12 +39,36 @@ installation, updates, and workflow execution are not implemented.
 `
 
 func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
-	return run(ctx, args, stdout, stderr, app.DefaultService())
+	return runWithRuntime(ctx, args, os.Stdin, stdout, stderr, app.DefaultService(), dashboard.IsInteractive, dashboard.Run)
 }
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer, service app.Service) error {
+	return runWithRuntime(ctx, args, strings.NewReader(""), stdout, stderr, service, dashboard.IsInteractive, dashboard.Run)
+}
+
+type terminalCheck func(io.Reader, io.Writer) bool
+
+type dashboardRunner func(context.Context, io.Reader, io.Writer, dashboard.Source, dashboard.RunOptions) error
+
+func runWithRuntime(
+	ctx context.Context,
+	args []string,
+	stdin io.Reader,
+	stdout io.Writer,
+	stderr io.Writer,
+	service app.Service,
+	interactive terminalCheck,
+	runDashboard dashboardRunner,
+) error {
 	_ = stderr
 	if len(args) == 0 {
+		if interactive(stdin, stdout) {
+			if err := startDashboard(ctx, stdin, stdout, service, runDashboard); err == nil {
+				return nil
+			} else if ctx.Err() != nil {
+				return err
+			}
+		}
 		return runStatus(ctx, false, stdout, service)
 	}
 	if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
@@ -50,6 +77,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, service a
 	}
 
 	switch args[0] {
+	case "dashboard":
+		if len(args) != 1 {
+			return fmt.Errorf("dashboard does not accept arguments; run 'setup-env help'")
+		}
+		if !interactive(stdin, stdout) {
+			return fmt.Errorf("dashboard requires an interactive input and output terminal; use 'setup-env status' for static output")
+		}
+		return startDashboard(ctx, stdin, stdout, service, runDashboard)
 	case "status":
 		jsonOutput, err := parseOutputArguments(args[1:])
 		if err != nil {
@@ -94,6 +129,19 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, service a
 	default:
 		return fmt.Errorf("unknown command %q; run 'setup-env help' for available commands", args[0])
 	}
+}
+
+func startDashboard(
+	ctx context.Context,
+	stdin io.Reader,
+	stdout io.Writer,
+	service app.Service,
+	runDashboard dashboardRunner,
+) error {
+	if err := runDashboard(ctx, stdin, stdout, service.Dashboard(), dashboard.RunOptions{}); err != nil {
+		return fmt.Errorf("start dashboard: %w", err)
+	}
+	return nil
 }
 
 func runStatus(ctx context.Context, jsonOutput bool, stdout io.Writer, service app.Service) error {

@@ -54,14 +54,14 @@ func (c Collector) Collect(ctx context.Context) (Snapshot, error) {
 		}
 		successes++
 	}
-	finalizeHealth(&result)
+	FinalizeHealth(&result)
 	if len(c.Sections) > 0 && successes == 0 {
 		return result, fmt.Errorf("collect system snapshot: every section failed")
 	}
 	return result, nil
 }
 
-func finalizeHealth(snapshot *Snapshot) {
+func FinalizeHealth(snapshot *Snapshot) {
 	warnings := len(snapshot.Warnings)
 	failures := 0
 	for _, check := range snapshot.Diagnostics.Checks {

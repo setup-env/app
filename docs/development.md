@@ -7,6 +7,9 @@
 - `github.com/shirou/gopsutil/v4` v4.26.6 for cross-platform host, CPU, memory,
   and filesystem metrics. Platform-specific transitive modules are selected by
   build constraints and do not add a runtime service.
+- `charm.land/bubbletea/v2` v2.0.8 for dashboard lifecycle, input, resize, and
+  rendering, plus `github.com/charmbracelet/x/term` v0.2.2 for terminal
+  detection. These pure-Go dependencies do not require CGO.
 - Git for repository-aware context and normal contribution workflows.
 - GitHub CLI only for authenticated GitHub operations; core local commands do
   not require it.
@@ -26,6 +29,7 @@ go run ./cmd/setup-env module validate-catalog
 go run ./cmd/setup-env module validate examples/setup-env.yaml
 go run ./cmd/setup-env status
 go run ./cmd/setup-env status --json
+go run ./cmd/setup-env dashboard
 ```
 
 Race testing requires a supported C toolchain and runs on Linux CI. The regular
@@ -52,6 +56,12 @@ go build -ldflags "-X github.com/setup-env/app/internal/version.Version=v0.1.0 -
 - Treat individual collector errors as structured warnings when a meaningful
   partial snapshot remains.
 - Keep status output deterministic and free of ANSI escape sequences.
+- Keep Bubble Tea and terminal lifecycle behavior inside `internal/dashboard`.
+- Never start the dashboard unless both input and output are suitable terminals.
+- Keep live histories bounded and prevent overlapping refresh collection.
+- Derive network rates only from monotonic elapsed time and nondecreasing
+  cumulative counters.
+- Preserve terminal state on every handled exit and cancellation path.
 - Keep module-specific behavior in its module repository.
 - Do not describe proposed commands as implemented.
 
@@ -77,9 +87,32 @@ failure of every section return an error.
 | CPU model, counts, sampled utilization | Where exposed by OS APIs | Where exposed by OS APIs | Where exposed by OS APIs |
 | Physical memory and utilization | Yes | Yes | Yes |
 | User-relevant filesystem capacity | Drive roots | Relevant mounted volumes | Relevant mounted filesystems |
-| Local interfaces, MAC, IPv4, IPv6 | Yes | Yes | Yes |
+| Local interfaces, MAC, IPv4, IPv6, cumulative counters | Where exposed | Where exposed | Where exposed |
 | Git, GitHub CLI, development root | Yes | Yes | Yes |
 
 The underlying operating system, permissions, virtual machine, or container may
-make an individual metric unavailable. Public IP, Wi-Fi secrets, process data,
-disk I/O rates, and network throughput are intentionally not collected.
+make an individual metric unavailable. Live throughput requires two valid
+samples of a stable interface counter; resets and interface churn display as
+unavailable until another sample exists. Public IP, Wi-Fi secrets, process
+data, and disk I/O rates are intentionally not collected.
+
+## Dashboard testing
+
+Most dashboard tests use injected snapshots, clocks, sources, dimensions, and
+messages; they do not require a real terminal. Validate terminal behavior with:
+
+```sh
+# Interactive terminal: starts the dashboard; press q to exit.
+go run ./cmd/setup-env dashboard
+
+# Redirection: prints a static snapshot with no ANSI controls.
+go run ./cmd/setup-env > status.txt
+
+# Non-TTY explicit mode: must fail with an interactive-terminal message.
+go run ./cmd/setup-env dashboard < /dev/null
+```
+
+On PowerShell, redirect the last command's input from a file. CI validates the
+non-interactive cases on every supported operating system. A pseudo-terminal
+smoke is deliberately omitted because the model/lifecycle tests cover the
+contract without adding a platform-specific PTY dependency or flaky timing.

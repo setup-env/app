@@ -13,21 +13,19 @@ Defined manifest v1, embedded the authoritative catalog, validated trust,
 status and compatibility, exposed local discovery commands, and documented the
 contribution flow.
 
-## Current
-
 ### Milestone 03 — System Snapshot and Status Output
 
-Provide a reusable, partial-failure-tolerant system snapshot with deterministic
-human output and a versioned JSON contract. Add `setup-env status` and make a
-static snapshot the no-argument experience. See [Milestone 03](milestone-03.md).
-
-## Next
+Added the reusable partial-failure snapshot, deterministic static output,
+schema-versioned JSON, system metrics, and installation landing documentation.
 
 ### Milestone 04 — Live Terminal Dashboard
 
-Reuse the snapshot collectors in a lightweight, `htop`-inspired terminal
-display with live refresh, trends, keyboard controls, resizing, and clean
-terminal restoration. This milestone will not add process management.
+Reused the snapshot collectors in a responsive live terminal application with
+bounded CPU/memory histories, network throughput, keyboard controls, help,
+resize handling, non-interactive fallback, and safe terminal restoration. See
+[Milestone 04](milestone-04.md).
+
+## Next
 
 ### Milestone 05 — Cross-Platform Releases and Bootstrap Installers
 

@@ -10,7 +10,8 @@ import (
 )
 
 type NetworkCollector struct {
-	Source NetworkSource
+	Source        NetworkSource
+	CounterSource NetworkCounterSource
 }
 
 func (NetworkCollector) Name() string { return "network" }
@@ -28,6 +29,22 @@ func (c NetworkCollector) Collect(ctx context.Context, snapshot *Snapshot) error
 		return fmt.Errorf("list interfaces: %w", err)
 	}
 	var problems []error
+	counters := make(map[string]networkCounters)
+	if c.CounterSource != nil {
+		values, counterErr := c.CounterSource.IOCounters(ctx, true)
+		if counterErr != nil {
+			problems = append(problems, fmt.Errorf("interface counters: %w", counterErr))
+		} else {
+			for _, value := range values {
+				counters[strings.ToLower(value.Name)] = networkCounters{
+					bytesReceived:      value.BytesRecv,
+					bytesTransmitted:   value.BytesSent,
+					packetsReceived:    value.PacketsRecv,
+					packetsTransmitted: value.PacketsSent,
+				}
+			}
+		}
+	}
 	for _, item := range interfaces {
 		if err := ctx.Err(); err != nil {
 			problems = append(problems, err)
@@ -51,18 +68,32 @@ func (c NetworkCollector) Collect(ctx context.Context, snapshot *Snapshot) error
 		if up {
 			status = "up"
 		}
-		snapshot.Networks = append(snapshot.Networks, NetworkInterface{
+		network := NetworkInterface{
 			Name:       item.Name,
 			Status:     status,
 			MACAddress: item.HardwareAddr.String(),
 			Loopback:   loopback,
 			Addresses:  filtered,
-		})
+		}
+		if value, ok := counters[strings.ToLower(item.Name)]; ok {
+			network.BytesReceived = uint64Pointer(value.bytesReceived)
+			network.BytesTransmitted = uint64Pointer(value.bytesTransmitted)
+			network.PacketsReceived = uint64Pointer(value.packetsReceived)
+			network.PacketsTransmitted = uint64Pointer(value.packetsTransmitted)
+		}
+		snapshot.Networks = append(snapshot.Networks, network)
 	}
 	sort.Slice(snapshot.Networks, func(left, right int) bool {
 		return strings.ToLower(snapshot.Networks[left].Name) < strings.ToLower(snapshot.Networks[right].Name)
 	})
 	return errors.Join(problems...)
+}
+
+type networkCounters struct {
+	bytesReceived      uint64
+	bytesTransmitted   uint64
+	packetsReceived    uint64
+	packetsTransmitted uint64
 }
 
 func FilterNetworkAddresses(addresses []net.Addr) []NetworkAddress {

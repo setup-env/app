@@ -19,6 +19,12 @@ go build -o bin\setup-env.exe .\cmd\setup-env
 .\bin\setup-env.exe
 ```
 
+Launching from Windows Terminal, PowerShell, or a modern Command Prompt opens
+the live dashboard. Press `q` to exit. Redirected output prints one static
+snapshot; use `.\bin\setup-env.exe status --json` for automation. Legacy or
+non-interactive consoles that cannot provide terminal input should use
+`status`.
+
 To install for the current user, copy `setup-env.exe` to a user-owned bin
 directory, such as `%USERPROFILE%\bin`, and add that directory to the user
 `PATH`. Avoid copying into protected system directories or using an elevated
