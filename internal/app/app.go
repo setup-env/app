@@ -12,6 +12,7 @@ import (
 	gitinspect "github.com/setup-env/app/internal/git"
 	"github.com/setup-env/app/internal/paths"
 	"github.com/setup-env/app/internal/platform"
+	"github.com/setup-env/app/internal/system"
 )
 
 type Info struct {
@@ -30,6 +31,7 @@ type Service struct {
 	Getwd            func() (string, error)
 	Commands         diagnostics.CommandRunner
 	CatalogSource    catalog.Source
+	SystemCollector  system.SnapshotCollector
 }
 
 func DefaultService() Service {
