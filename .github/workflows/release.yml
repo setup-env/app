@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Validate and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Validate tag and release uniqueness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s\n' "$GITHUB_REF_NAME" | grep -Eq '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$'
+          test "$(git rev-list -n 1 "$GITHUB_REF_NAME")" = "$GITHUB_SHA"
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release $GITHUB_REF_NAME already exists and will not be replaced" >&2
+            exit 1
+          fi
+
+      - name: Verify formatting
+        run: test -z "$(gofmt -l .)"
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Test with race detector
+        run: go test -race ./...
+
+      - name: Validate catalog and reference manifest
+        run: |
+          go run ./cmd/setup-env module validate-catalog
+          go run ./cmd/setup-env module validate examples/setup-env.yaml
+
+      - name: Test installers
+        shell: pwsh
+        run: ./tests/install.ps1.tests.ps1
+
+      - name: Test POSIX installer
+        shell: bash
+        run: sh tests/install.sh.tests.sh
+
+      - name: Build and verify release artifacts
+        run: |
+          BUILD_DATE=$(git show -s --format=%cI "$GITHUB_SHA")
+          go run ./cmd/release \
+            -version "$GITHUB_REF_NAME" \
+            -commit "$GITHUB_SHA" \
+            -date "$BUILD_DATE" \
+            -dirty=false \
+            -output dist
+
+      - name: Verify native Linux binary
+        run: |
+          mkdir release-check
+          tar -xzf "dist/setup-env_${GITHUB_REF_NAME#v}_linux_amd64.tar.gz" -C release-check
+          release-check/setup-env version | grep "setup-env $GITHUB_REF_NAME"
+          release-check/setup-env version | grep "$GITHUB_SHA"
+          release-check/setup-env status --json | python3 -m json.tool >/dev/null
+
+      - name: Exercise release installer
+        shell: bash
+        run: sh tests/install.sh.integration.sh dist "$GITHUB_REF_NAME"
+
+      - name: Create GitHub Release
+        id: publish
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Setup Env $GITHUB_REF_NAME" \
+            --notes-file .github/RELEASE_TEMPLATE.md
+
+      - name: Remove partial release after publication failure
+        if: steps.publish.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --yes || true
+          echo "release publication failed; any partial release was removed and the tag was preserved" >&2
+          exit 1

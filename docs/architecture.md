@@ -136,6 +136,25 @@ This separation also preserves future desktop reuse: the desktop application
 can consume snapshots and rates without importing terminal layout or lifecycle
 behavior.
 
+## Release and installation architecture
+
+`cmd/release` consumes the same Go source without mutation and produces the six
+supported native archives. It sets `CGO_ENABLED=0`, removes local source paths
+and variable build IDs, and injects version, commit, commit timestamp, and dirty
+state into `internal/version`. Stable timestamps, entry order, modes, owners,
+and archive headers make repeated builds comparable.
+
+The builder owns archive naming, minimal contents, SHA-256 generation, and
+post-build verification. Bootstrap scripts independently implement
+platform-specific download, checksum, extraction, candidate execution,
+replacement, rollback, metadata, and uninstall behavior. The runtime never
+reads installer metadata and never checks GitHub for updates.
+
+Ordinary CI has read-only permission and validates snapshots/installers without
+publication. A separate `v*` workflow has only release-content write permission
+and publishes from the exact tag after validation. Checksums and GitHub-hosted
+provenance provide an initial integrity model, not independent code signing.
+
 ## Manifest and catalog authority
 
 The versioned module manifest identifies a module, compatibility, supported

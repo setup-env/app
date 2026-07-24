@@ -116,3 +116,41 @@ On PowerShell, redirect the last command's input from a file. CI validates the
 non-interactive cases on every supported operating system. A pseudo-terminal
 smoke is deliberately omitted because the model/lifecycle tests cover the
 contract without adding a platform-specific PTY dependency or flaky timing.
+
+## Release and installer development
+
+Build a credential-free snapshot without tags or publication:
+
+```sh
+make release-snapshot
+make release-verify
+```
+
+Override the candidate version when validating exact public names:
+
+```sh
+make RELEASE_VERSION=v0.1.0 release-snapshot
+make RELEASE_VERSION=v0.1.0 release-verify
+```
+
+The release builder accepts `-targets linux/amd64` (or a comma-separated list)
+for focused iteration. It refuses unrelated files in the output directory;
+`-clean-owned` removes only prior `setup-env_*` assets and `checksums.txt`.
+
+Installer unit tests:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests\install.ps1.tests.ps1
+```
+
+```sh
+sh tests/install.sh.tests.sh
+```
+
+Native integration tests consume local `dist/` fixtures and install only into
+temporary directories. Public GitHub availability is deliberately absent from
+tests.
+
+Release-critical official actions are pinned to immutable commits. Update the
+commit and version comment together after reviewing upstream changes. Tag
+publication procedures are in [Release operations](releasing.md).

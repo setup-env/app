@@ -25,12 +25,15 @@ bounded CPU/memory histories, network throughput, keyboard controls, help,
 resize handling, non-interactive fallback, and safe terminal restoration. See
 [Milestone 04](milestone-04.md).
 
-## Next
-
 ### Milestone 05 — Cross-Platform Releases and Bootstrap Installers
 
-Publish verified Windows, macOS, and Linux artifacts with supported bootstrap
-installation, upgrade, release-note, and rollback paths.
+Added reproducible Windows, macOS, and Linux archives, release metadata,
+SHA-256 checksums, user-scoped PowerShell and POSIX installers, safe upgrade and
+uninstall behavior, offline tests, tag-only publication automation, and release
+operations documentation. Public `v0.1.0` publication remains an explicit
+approval step. See [Milestone 05](milestone-05.md).
+
+## Next
 
 ### Milestone 06 — Module Download, Cache, and Verification
 
