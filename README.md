@@ -1,54 +1,122 @@
 # Setup Env
 
-Setup Env is a cross-platform terminal application for understanding and
-preparing a development environment. It provides a live system dashboard,
-static and machine-readable status, environment diagnostics, and a versioned
-catalog of Setup Env modules on Windows, Apple macOS, and Ubuntu Linux.
+Setup Env is a cross-platform terminal application for inspecting and preparing
+a development environment. It provides a live system dashboard, static and
+machine-readable status, diagnostics, and a versioned local module catalog.
 
 ## Install
 
-Release installers are planned but are not published yet. Build the current
-application from source using the platform guide:
+Official binaries are distributed only through
+[GitHub Releases](https://github.com/setup-env/app/releases). Before running a
+bootstrap command, confirm that the requested release exists and review the
+downloaded installer. The prepared first version is `v0.1.0`; it is not
+available until that tag and release appear on the releases page.
+
+Installers use current-user directories, verify the archive with SHA-256 before
+extraction, and do not require Git, Go, `gh`, administrator, or root access.
 
 ### Windows
 
-[Install Setup Env on Windows](docs/install/windows.md)
+PowerShell 5.1 or 7 on amd64 or arm64:
+
+```powershell
+$version = "v0.1.0"
+Invoke-WebRequest https://raw.githubusercontent.com/setup-env/app/main/install.ps1 -OutFile install.ps1
+Get-Content .\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Version $version
+Remove-Item .\install.ps1
+```
+
+`-ExecutionPolicy Bypass` applies only to that reviewed installer process; the
+script never changes system execution-policy settings. Detailed and manual
+instructions: [Windows installation](docs/install/windows.md).
 
 ### Apple macOS
 
-[Install Setup Env on Apple macOS](docs/install/macos.md)
+POSIX shell on Intel or Apple Silicon:
+
+```sh
+version=v0.1.0
+curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
+less install.sh
+sh install.sh --version "$version"
+rm install.sh
+```
+
+Detailed and manual instructions: [macOS installation](docs/install/macos.md).
 
 ### Ubuntu Linux
 
-[Install Setup Env on Ubuntu Linux](docs/install/ubuntu.md)
-
-## Dashboard and status
-
-Launch `setup-env` in an interactive terminal to open the live dashboard:
+POSIX shell on amd64 or arm64:
 
 ```sh
+version=v0.1.0
+curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
+less install.sh
+sh install.sh --version "$version"
+rm install.sh
+```
+
+Detailed and manual instructions: [Ubuntu installation](docs/install/ubuntu.md).
+
+### Launch
+
+Open a new terminal if the installer added or reported a PATH entry, then run:
+
+```sh
+setup-env version
 setup-env
 ```
 
-When input or output is redirected or piped, the same no-argument command
-prints one static, ANSI-free snapshot instead. Automation never enters the
-dashboard unexpectedly.
+Useful non-interactive commands:
 
 ```sh
-setup-env > status.txt
-setup-env | less
 setup-env status
 setup-env status --json
-setup-env dashboard
+setup-env doctor
+setup-env module list
 ```
 
-`setup-env dashboard` explicitly requires an interactive terminal and otherwise
-returns an actionable error. `setup-env status` is always static, while
-`setup-env status --json` emits schema-versioned machine data.
-If automatic dashboard initialization fails, the no-argument path restores the
-terminal and falls back to one static snapshot.
+### Upgrade and uninstall
 
-Dashboard controls:
+Download and review the current installer again, then:
+
+```powershell
+# Windows
+.\install.ps1 -Upgrade
+.\install.ps1 -Uninstall -Yes
+```
+
+```sh
+# macOS and Ubuntu
+sh install.sh --upgrade
+sh install.sh --uninstall --yes
+```
+
+Uninstall removes only installer-owned binary and metadata files. Configuration
+and cache remain unless the explicit `-Purge`/`--purge` option is combined with
+uninstall.
+
+### Security and signing
+
+Installers download only release archives and `checksums.txt` from the official
+`setup-env/app` GitHub Release. A checksum mismatch stops installation before
+the binary is executed. SHA-256 protects integrity relative to the checksum
+published in the same release; it is not equivalent to independent code
+signing.
+
+Windows binaries are initially unsigned. macOS binaries are initially unsigned
+and unnotarized, so SmartScreen or Gatekeeper may warn. The installers do not
+disable those controls or remove quarantine attributes. See [Security](SECURITY.md).
+
+Homebrew, WinGet, Chocolatey, Scoop, APT repositories, Snap, Flatpak, MSI, PKG,
+and DMG distribution are not available.
+
+## Dashboard and status
+
+Launching `setup-env` in a suitable interactive terminal opens the live
+dashboard. Redirected, piped, `TERM=dumb`, or failed automatic initialization
+prints one static ANSI-free snapshot instead.
 
 ```text
 q / Ctrl+C  quit
@@ -57,61 +125,48 @@ p / Space   pause or resume
 ?           toggle help
 ```
 
-Representative wide-terminal layout:
+CPU, memory, and network refresh every second; filesystems every five seconds;
+development diagnostics every sixty seconds. Individual metric failures appear
+as warnings without stopping the dashboard.
 
-```text
-+ Setup Env -------------------------------------------------------------+
-| example-host | Ubuntu 26.04 | amd64 | uptime 03:12:18 | 2026-07-24 ... |
-+ CPU -------------------------------+ + Memory -------------------------+
-| 17.3%  physical 4  logical 8       | | 3.2 GiB / 7.3 GiB  43.8%       |
-| ...::--==++                         | | ...:::---===                    |
-+ Filesystems -----------------------------------------------------------+
-| /          28.4 GiB / 118.0 GiB  24.1% [####----------------]         |
-+ Network ---------------------------------------------------------------+
-| eth0  10.0.0.9  down 12.4 KiB/s  up 2.1 KiB/s                        |
-+ Development and health -----------------------------------------------+
-| root ~/dev | Git available | GitHub CLI available | health healthy    |
-+------------------------------------------------------------------------+
- q quit | r refresh | p pause | ? help | live
-```
-
-The dashboard uses ASCII structure and remains useful without color. CPU,
-memory, and network refresh every second; filesystems every five seconds; and
-development diagnostics every sixty seconds. Individual metric failures
-remain visible as warnings without stopping the interface.
-
-Help remains available through `setup-env help` and `setup-env --help`.
-
-Other commands are:
-
-```text
-setup-env version
-setup-env info [--json]
-setup-env doctor [--json]
-setup-env module list [--json] [--trust <level>] [--status <status>] [--category <category>]
-setup-env module info <module> [--json]
-setup-env module validate <path> [--json]
-setup-env module validate-catalog
-```
-
-Catalog discovery and local manifest validation are implemented. Module
-downloading, caching, installation, updates, and workflow execution are not.
-A listed `planned` module is not runnable.
+`setup-env status` is always static. `setup-env status --json` emits the stable
+schema-versioned snapshot intended for automation.
 
 ## Module catalog
 
 [`catalog/modules.yaml`](catalog/modules.yaml) is the authoritative embedded
-catalog. It controls listing, repository location, trust, and status. A
-module's `setup-env.yaml` controls capabilities, platforms, compatibility,
-workflows, and metadata.
+catalog. Catalog discovery and local manifest validation are implemented.
+Module downloading, caching, installation, updates, and execution are not.
 
-[`setup-env/awesome-setup-env`](https://github.com/setup-env/awesome-setup-env)
-is a separate human-curated list. Inclusion there does not grant catalog trust
-or installability.
+## Build from source
 
-## Directory convention
+Source development requires Git and Go 1.26; `go.mod` pins toolchain 1.26.5.
 
-Setup Env resolves paths dynamically under the current user's home directory:
+```sh
+git clone https://github.com/setup-env/app.git
+cd app
+go test ./...
+go build -o bin/setup-env ./cmd/setup-env
+```
+
+Use `bin/setup-env.exe` on Windows. Source-development details are in
+[Development](docs/development.md).
+
+## Release verification
+
+Every release contains six native archives and `checksums.txt`. Each archive
+contains only the native executable, project license, release README, and
+third-party notices. Manual verification is documented in each platform guide.
+
+Release preparation and rollback procedures are in
+[Release operations](docs/releasing.md). Changes are curated in
+[CHANGELOG.md](CHANGELOG.md).
+
+## Configuration and directories
+
+No configuration is required. If present, `config.json` uses the operating
+system’s standard user configuration directory. Development paths are resolved
+dynamically as:
 
 ```text
 ~/dev/<organization>/<repository>
@@ -120,38 +175,11 @@ Setup Env resolves paths dynamically under the current user's home directory:
 No username, drive letter, or slash convention is hard-coded. See
 [Directory conventions](docs/directory-conventions.md).
 
-## Build and run
+## Contributing and security
 
-Go 1.26 is required; `go.mod` pins Go 1.26.5.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development rules. Report
+vulnerabilities using the private process in [SECURITY.md](SECURITY.md); do not
+publish credentials or exploit details in public issues.
 
-```sh
-go build -o bin/setup-env ./cmd/setup-env
-go run ./cmd/setup-env status
-go run ./cmd/setup-env status --json
-go test ./...
-```
-
-On Windows, use `bin/setup-env.exe`. The command name is `setup-env` on every
-platform.
-
-## Configuration
-
-No configuration file is required. If present, `config.json` is loaded from
-the operating system's standard user configuration directory under
-`setup-env/`. See [the example configuration](docs/config.example.json).
-Configuration never contains credentials or access tokens.
-
-## Roadmap and contributions
-
-Cross-platform releases are next; module retrieval and workflow execution
-remain future work. See the [roadmap](docs/roadmap.md),
-[architecture](docs/architecture.md), and
-[Milestone 04 notes](docs/milestone-04.md).
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md), the
-[module model](docs/module-model.md), and the
-[module contribution process](docs/module-contributions.md).
-
-## License
-
-[MIT](LICENSE)
+Setup Env is licensed under [Apache License 2.0](LICENSE). Dependency attribution
+is summarized in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

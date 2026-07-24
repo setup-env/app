@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: go.mod
           cache: false
@@ -41,6 +41,15 @@ jobs:
 
       - name: Test
         run: go test ./...
+
+      - name: Test PowerShell installer functions
+        shell: pwsh
+        run: ./tests/install.ps1.tests.ps1
+
+      - name: Test POSIX installer functions
+        if: runner.os != 'Windows'
+        shell: bash
+        run: sh tests/install.sh.tests.sh
 
       - name: Validate catalog and reference manifest
         run: |
@@ -114,10 +123,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: go.mod
           cache: false
@@ -134,13 +143,110 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: go.mod
           cache: false
 
       - name: Test with race detector
         run: go test -race ./...
+
+  release-snapshot:
+    name: Release snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Build and verify candidate artifacts
+        run: go run ./cmd/release -version v0.1.0 -dirty=false -output dist
+
+      - name: Verify complete artifact matrix
+        shell: pwsh
+        run: |
+          $expected = @(
+            "checksums.txt",
+            "setup-env_0.1.0_windows_amd64.zip",
+            "setup-env_0.1.0_windows_arm64.zip",
+            "setup-env_0.1.0_darwin_amd64.tar.gz",
+            "setup-env_0.1.0_darwin_arm64.tar.gz",
+            "setup-env_0.1.0_linux_amd64.tar.gz",
+            "setup-env_0.1.0_linux_arm64.tar.gz"
+          ) | Sort-Object
+          $actual = Get-ChildItem dist -File | Select-Object -ExpandProperty Name | Sort-Object
+          if (Compare-Object $expected $actual) {
+            throw "release artifact matrix is incomplete or contains unexpected files"
+          }
+
+      - name: Verify injected metadata
+        run: |
+          mkdir metadata-check
+          tar -xzf dist/setup-env_0.1.0_linux_amd64.tar.gz -C metadata-check
+          metadata-check/setup-env version | grep 'setup-env v0.1.0'
+          metadata-check/setup-env version | grep "${GITHUB_SHA}"
+          metadata-check/setup-env version | grep 'dirty false'
+
+      - name: Verify reproducible Linux archive
+        run: |
+          go run ./cmd/release -version v0.1.0 -dirty=false -targets linux/amd64 -output dist-repeat
+          test "$(sha256sum dist/setup-env_0.1.0_linux_amd64.tar.gz | cut -d' ' -f1)" = \
+            "$(sha256sum dist-repeat/setup-env_0.1.0_linux_amd64.tar.gz | cut -d' ' -f1)"
+
+  installer-integration:
+    name: Installer integration (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux/amd64
+            installer: shell
+          - os: macos-latest
+            target: darwin/arm64
+            installer: shell
+          - os: windows-latest
+            target: windows/amd64
+            installer: powershell
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Build local installer fixture
+        run: |
+          go run ./cmd/release -version v0.1.0 -dirty=false -targets ${{ matrix.target }} -output dist
+          go run ./cmd/release -version v0.1.1 -dirty=false -targets ${{ matrix.target }} -output dist-upgrade
+
+      - name: Exercise PowerShell installer
+        if: matrix.installer == 'powershell'
+        shell: pwsh
+        run: |
+          ./tests/install.ps1.integration.ps1 `
+            -ReleaseDir dist `
+            -Version v0.1.0 `
+            -UpgradeReleaseDir dist-upgrade `
+            -UpgradeVersion v0.1.1
+
+      - name: Exercise POSIX installer
+        if: matrix.installer == 'shell'
+        shell: bash
+        run: sh tests/install.sh.integration.sh dist v0.1.0 dist-upgrade v0.1.1

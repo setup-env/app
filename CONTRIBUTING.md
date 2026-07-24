@@ -58,3 +58,13 @@ feature branch → pull request → validation → approval → merge to main
 Recommended `main` protection requires at least one approval, successful CI,
 resolved conversations, and blocks force pushes and ordinary direct pushes.
 Administrator overrides should be exceptional and intentional.
+
+Release and installer changes must preserve deterministic archive names and
+contents, SHA-256 verification before execution, user-scoped defaults, rollback
+on replacement failure, and scoped uninstall. Installer tests must use
+temporary locations and offline fixtures; pull-request workflows must never
+receive release write permission.
+
+Do not publish tags or GitHub Releases from a contribution branch. Follow
+[`docs/releasing.md`](docs/releasing.md) only from clean, synchronized `main`
+after explicit release authorization.
