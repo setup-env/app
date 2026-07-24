@@ -76,10 +76,21 @@ for investigation. Do not rerun publication blindly.
 GitHub Releases are the rollback record; installers do not implement background
 or automatic updates.
 
-## Protection recommendations
+## Main protection
 
-The repository currently has no branch protection or ruleset. Recommended
-hardening is to require pull requests and successful CI on `main`, restrict tag
-creation for `v*`, prevent tag deletion/rewrites, and limit release workflow
-modification to reviewed changes. Do not bypass configured protection for
-routine releases.
+The active `Protect main` repository ruleset requires pull requests, squash
+merges and linear history, resolved conversations, and every CI job that runs
+on ordinary pull requests. It blocks force pushes, branch deletion, and
+ordinary direct pushes. Required checks are loosely based, so a passing branch
+does not need another complete 14-job run solely because an unrelated pull
+request merged first.
+
+The approval count is zero while the repository has one direct maintainer;
+self-approval cannot satisfy a required review. New commits dismiss any
+existing approvals. Repository administrators have a pull-request-only bypass
+for emergency maintenance, which retains a PR and audit trail and must not be
+used for routine release work.
+
+The tag-triggered `Release` workflow is intentionally not a required
+pull-request check. Release tags and published assets remain governed by the
+immutable-version and explicit-authorization policy above.
