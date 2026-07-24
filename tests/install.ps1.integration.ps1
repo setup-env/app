@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)][string]$ReleaseDir,
-    [string]$Version = "v0.1.0",
+    [string]$Version = "v0.0.1",
     [string]$UpgradeReleaseDir,
     [string]$UpgradeVersion
 )

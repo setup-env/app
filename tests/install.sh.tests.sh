@@ -23,7 +23,7 @@ assert_fails() {
     fi
 }
 
-assert_equal "$(normalize_version 0.1.0)" v0.1.0 "version normalization"
+assert_equal "$(normalize_version 0.0.1)" v0.0.1 "version normalization"
 assert_equal "$(normalize_version v1.2.3-rc.1)" v1.2.3-rc.1 "prerelease normalization"
 assert_fails "invalid version" normalize_version latest-ish
 assert_fails "build metadata version" normalize_version v1.2.3+build.4
@@ -34,16 +34,16 @@ assert_equal "$(detect_arch x86_64)" amd64 "x86_64 mapping"
 assert_equal "$(detect_arch aarch64)" arm64 "aarch64 mapping"
 assert_fails "unsupported architecture" detect_arch i386
 assert_equal \
-    "$(asset_name v0.1.0 linux arm64)" \
-    setup-env_0.1.0_linux_arm64.tar.gz \
+    "$(asset_name v0.0.1 linux arm64)" \
+    setup-env_0.0.1_linux_arm64.tar.gz \
     "asset naming"
 
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/setup-env-shell-unit.XXXXXX")
 trap 'rm -rf "$temporary"' EXIT HUP INT TERM
 hash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-printf '%s  %s\n' "$hash" setup-env_0.1.0_linux_amd64.tar.gz >"$temporary/checksums.txt"
+printf '%s  %s\n' "$hash" setup-env_0.0.1_linux_amd64.tar.gz >"$temporary/checksums.txt"
 assert_equal \
-    "$(checksum_for "$temporary/checksums.txt" setup-env_0.1.0_linux_amd64.tar.gz)" \
+    "$(checksum_for "$temporary/checksums.txt" setup-env_0.0.1_linux_amd64.tar.gz)" \
     "$hash" \
     "checksum parsing"
 assert_fails "missing checksum" checksum_for "$temporary/checksums.txt" missing.tar.gz

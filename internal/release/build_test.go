@@ -9,7 +9,7 @@ import (
 
 func TestReadChecksums(t *testing.T) {
 	path := filepath.Join(t.TempDir(), ChecksumsName)
-	line := strings.Repeat("a", 64) + "  setup-env_0.1.0_linux_amd64.tar.gz\n"
+	line := strings.Repeat("a", 64) + "  setup-env_0.0.1_linux_amd64.tar.gz\n"
 	if err := os.WriteFile(path, []byte(line), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -17,14 +17,14 @@ func TestReadChecksums(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got["setup-env_0.1.0_linux_amd64.tar.gz"] != strings.Repeat("a", 64) {
+	if got["setup-env_0.0.1_linux_amd64.tar.gz"] != strings.Repeat("a", 64) {
 		t.Fatalf("checksums = %v", got)
 	}
 }
 
 func TestPrepareOutputRemovesOnlyOwnedFiles(t *testing.T) {
 	output := t.TempDir()
-	owned := filepath.Join(output, "setup-env_0.1.0_linux_amd64.tar.gz")
+	owned := filepath.Join(output, "setup-env_0.0.1_linux_amd64.tar.gz")
 	if err := os.WriteFile(owned, []byte("old"), 0o600); err != nil {
 		t.Fatal(err)
 	}

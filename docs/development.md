@@ -38,7 +38,7 @@ matrix validates Windows, macOS, and Linux.
 Build metadata can be injected with linker flags:
 
 ```sh
-go build -ldflags "-X github.com/setup-env/app/internal/version.Version=v0.1.0 -X github.com/setup-env/app/internal/version.Commit=<sha> -X github.com/setup-env/app/internal/version.Date=<date>" -o bin/setup-env ./cmd/setup-env
+go build -ldflags "-X github.com/setup-env/app/internal/version.Version=v0.0.1 -X github.com/setup-env/app/internal/version.Commit=<sha> -X github.com/setup-env/app/internal/version.Date=<date>" -o bin/setup-env ./cmd/setup-env
 ```
 
 ## Design rules
@@ -129,8 +129,8 @@ make release-verify
 Override the candidate version when validating exact public names:
 
 ```sh
-make RELEASE_VERSION=v0.1.0 release-snapshot
-make RELEASE_VERSION=v0.1.0 release-verify
+make RELEASE_VERSION=v0.0.1 release-snapshot
+make RELEASE_VERSION=v0.0.1 release-verify
 ```
 
 The release builder accepts `-targets linux/amd64` (or a comma-separated list)

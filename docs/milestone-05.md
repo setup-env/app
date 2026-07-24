@@ -43,16 +43,16 @@ Each contains:
 - release `README.md`;
 - `THIRD_PARTY_NOTICES.md`.
 
-Artifact matrix for `v0.1.0`:
+Artifact matrix for `v0.0.1`:
 
 | Operating system | Architecture | Asset |
 | --- | --- | --- |
-| Windows | amd64 | `setup-env_0.1.0_windows_amd64.zip` |
-| Windows | arm64 | `setup-env_0.1.0_windows_arm64.zip` |
-| macOS | amd64 | `setup-env_0.1.0_darwin_amd64.tar.gz` |
-| macOS | arm64 | `setup-env_0.1.0_darwin_arm64.tar.gz` |
-| Linux | amd64 | `setup-env_0.1.0_linux_amd64.tar.gz` |
-| Linux | arm64 | `setup-env_0.1.0_linux_arm64.tar.gz` |
+| Windows | amd64 | `setup-env_0.0.1_windows_amd64.zip` |
+| Windows | arm64 | `setup-env_0.0.1_windows_arm64.zip` |
+| macOS | amd64 | `setup-env_0.0.1_darwin_amd64.tar.gz` |
+| macOS | arm64 | `setup-env_0.0.1_darwin_arm64.tar.gz` |
+| Linux | amd64 | `setup-env_0.0.1_linux_amd64.tar.gz` |
+| Linux | arm64 | `setup-env_0.0.1_linux_arm64.tar.gz` |
 
 `checksums.txt` contains one sorted SHA-256 entry per archive. The builder
 self-verifies checksum coverage, hashes, safe paths, and exact archive contents.
@@ -119,6 +119,12 @@ Linux amd64 candidate builds both produced SHA-256
 Artifacts were also scanned for the local username/path, token patterns, and
 private-key markers with no matches.
 
+That PR run is historical evidence for the then-planned unpublished
+`v0.1.0` candidate and its `v0.1.1` upgrade fixture. Before any public tag
+existed, the first release was renumbered to `v0.0.1`. Release preparation then
+rebuilt and verified the complete `v0.0.1` matrix, exercised the PowerShell
+installer from `v0.0.1` to `v0.0.2`, and reran both installer unit suites.
+
 ## Workflow security and publication
 
 PR CI has `contents: read`. The separate `v*` workflow has only
@@ -126,7 +132,7 @@ PR CI has `contents: read`. The separate `v*` workflow has only
 tag and release uniqueness, and publishes only after every validation succeeds.
 Artifact attestations are deferred; checksums remain mandatory.
 
-The public `v0.1.0` tag and GitHub Release are intentionally pending an explicit
+The public `v0.0.1` tag and GitHub Release are intentionally pending an explicit
 publication approval after implementation merges into synchronized `main`.
 
 ## Signing limitations and future hardening

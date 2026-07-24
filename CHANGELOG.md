@@ -6,6 +6,8 @@ All notable changes are documented here. The format follows
 
 ## [Unreleased]
 
+## v0.0.1
+
 ### Added
 
 - Cross-platform application foundation, configuration, diagnostics, and CI.
@@ -18,5 +20,6 @@ All notable changes are documented here. The format follows
   verified upgrades, rollback, scoped uninstall, and offline tests.
 - Isolated tag-triggered GitHub Release workflow and release-operations guidance.
 
-No public version has been dated or declared here until its release is actually
-published.
+Prepared as the first public release. It remains unpublished until the
+`v0.0.1` tag triggers the release workflow. No publication date is recorded
+before that happens.

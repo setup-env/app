@@ -1,6 +1,6 @@
 .PHONY: build test race vet fmt validate release-snapshot release-verify check
 
-RELEASE_VERSION ?= v0.1.0-snapshot
+RELEASE_VERSION ?= v0.0.1-snapshot
 
 build:
 	go build -o bin/setup-env ./cmd/setup-env

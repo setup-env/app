@@ -170,19 +170,19 @@ jobs:
           cache: false
 
       - name: Build and verify candidate artifacts
-        run: go run ./cmd/release -version v0.1.0 -dirty=false -output dist
+        run: go run ./cmd/release -version v0.0.1 -dirty=false -output dist
 
       - name: Verify complete artifact matrix
         shell: pwsh
         run: |
           $expected = @(
             "checksums.txt",
-            "setup-env_0.1.0_windows_amd64.zip",
-            "setup-env_0.1.0_windows_arm64.zip",
-            "setup-env_0.1.0_darwin_amd64.tar.gz",
-            "setup-env_0.1.0_darwin_arm64.tar.gz",
-            "setup-env_0.1.0_linux_amd64.tar.gz",
-            "setup-env_0.1.0_linux_arm64.tar.gz"
+            "setup-env_0.0.1_windows_amd64.zip",
+            "setup-env_0.0.1_windows_arm64.zip",
+            "setup-env_0.0.1_darwin_amd64.tar.gz",
+            "setup-env_0.0.1_darwin_arm64.tar.gz",
+            "setup-env_0.0.1_linux_amd64.tar.gz",
+            "setup-env_0.0.1_linux_arm64.tar.gz"
           ) | Sort-Object
           $actual = Get-ChildItem dist -File | Select-Object -ExpandProperty Name | Sort-Object
           if (Compare-Object $expected $actual) {
@@ -192,16 +192,16 @@ jobs:
       - name: Verify injected metadata
         run: |
           mkdir metadata-check
-          tar -xzf dist/setup-env_0.1.0_linux_amd64.tar.gz -C metadata-check
-          metadata-check/setup-env version | grep 'setup-env v0.1.0'
+          tar -xzf dist/setup-env_0.0.1_linux_amd64.tar.gz -C metadata-check
+          metadata-check/setup-env version | grep 'setup-env v0.0.1'
           metadata-check/setup-env version | grep "${GITHUB_SHA}"
           metadata-check/setup-env version | grep 'dirty false'
 
       - name: Verify reproducible Linux archive
         run: |
-          go run ./cmd/release -version v0.1.0 -dirty=false -targets linux/amd64 -output dist-repeat
-          test "$(sha256sum dist/setup-env_0.1.0_linux_amd64.tar.gz | cut -d' ' -f1)" = \
-            "$(sha256sum dist-repeat/setup-env_0.1.0_linux_amd64.tar.gz | cut -d' ' -f1)"
+          go run ./cmd/release -version v0.0.1 -dirty=false -targets linux/amd64 -output dist-repeat
+          test "$(sha256sum dist/setup-env_0.0.1_linux_amd64.tar.gz | cut -d' ' -f1)" = \
+            "$(sha256sum dist-repeat/setup-env_0.0.1_linux_amd64.tar.gz | cut -d' ' -f1)"
 
   installer-integration:
     name: Installer integration (${{ matrix.os }})
@@ -233,8 +233,8 @@ jobs:
 
       - name: Build local installer fixture
         run: |
-          go run ./cmd/release -version v0.1.0 -dirty=false -targets ${{ matrix.target }} -output dist
-          go run ./cmd/release -version v0.1.1 -dirty=false -targets ${{ matrix.target }} -output dist-upgrade
+          go run ./cmd/release -version v0.0.1 -dirty=false -targets ${{ matrix.target }} -output dist
+          go run ./cmd/release -version v0.0.2 -dirty=false -targets ${{ matrix.target }} -output dist-upgrade
 
       - name: Exercise PowerShell installer
         if: matrix.installer == 'powershell'
@@ -242,11 +242,11 @@ jobs:
         run: |
           ./tests/install.ps1.integration.ps1 `
             -ReleaseDir dist `
-            -Version v0.1.0 `
+            -Version v0.0.1 `
             -UpgradeReleaseDir dist-upgrade `
-            -UpgradeVersion v0.1.1
+            -UpgradeVersion v0.0.2
 
       - name: Exercise POSIX installer
         if: matrix.installer == 'shell'
         shell: bash
-        run: sh tests/install.sh.integration.sh dist v0.1.0 dist-upgrade v0.1.1
+        run: sh tests/install.sh.integration.sh dist v0.0.1 dist-upgrade v0.0.2

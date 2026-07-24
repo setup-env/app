@@ -30,7 +30,7 @@ resize handling, non-interactive fallback, and safe terminal restoration. See
 Added reproducible Windows, macOS, and Linux archives, release metadata,
 SHA-256 checksums, user-scoped PowerShell and POSIX installers, safe upgrade and
 uninstall behavior, offline tests, tag-only publication automation, and release
-operations documentation. Public `v0.1.0` publication remains an explicit
+operations documentation. Public `v0.0.1` publication remains an explicit
 approval step. See [Milestone 05](milestone-05.md).
 
 ## Next

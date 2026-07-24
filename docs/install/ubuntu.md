@@ -12,7 +12,7 @@ Official assets exist only when the requested tag appears on
 ## Recommended reviewed installer
 
 ```sh
-version=v0.1.0
+version=v0.0.1
 curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
 less install.sh
 sh install.sh --version "$version"
@@ -24,7 +24,7 @@ PATH guidance rather than modifying a profile.
 
 ```sh
 sh install.sh                              # latest release
-sh install.sh --version v0.1.0             # explicit version
+sh install.sh --version v0.0.1             # explicit version
 sh install.sh --upgrade                    # latest verified upgrade
 sh install.sh --install-dir "$HOME/bin"    # custom path
 sh install.sh --uninstall --yes
@@ -34,7 +34,7 @@ sh install.sh --uninstall --purge --yes    # also configuration/cache
 ## Manual archive installation
 
 ```sh
-asset=setup-env_0.1.0_linux_amd64.tar.gz # use arm64 when appropriate
+asset=setup-env_0.0.1_linux_amd64.tar.gz # use arm64 when appropriate
 expected=$(awk -v asset="$asset" '$2 == asset {print $1}' checksums.txt)
 actual=$(sha256sum "$asset" | awk '{print $1}')
 test "$actual" = "$expected"

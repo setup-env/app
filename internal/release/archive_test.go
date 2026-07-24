@@ -22,8 +22,8 @@ func TestArchivesAreDeterministicAndMinimal(t *testing.T) {
 	for _, target := range []Target{{OS: "windows", Arch: "amd64"}, {OS: "linux", Arch: "amd64"}} {
 		targetFiles := append([]archiveFile(nil), files...)
 		targetFiles[0].Name = target.BinaryName()
-		first := filepath.Join(t.TempDir(), target.ArchiveName("v0.1.0"))
-		second := filepath.Join(t.TempDir(), target.ArchiveName("v0.1.0"))
+		first := filepath.Join(t.TempDir(), target.ArchiveName("v0.0.1"))
+		second := filepath.Join(t.TempDir(), target.ArchiveName("v0.0.1"))
 		if err := writeArchive(first, target, targetFiles, timestamp); err != nil {
 			t.Fatal(err)
 		}
@@ -44,7 +44,7 @@ func TestArchivesAreDeterministicAndMinimal(t *testing.T) {
 func TestVerifyRejectsChecksumMismatch(t *testing.T) {
 	target := Target{OS: "windows", Arch: "amd64"}
 	output := t.TempDir()
-	path := filepath.Join(output, target.ArchiveName("v0.1.0"))
+	path := filepath.Join(output, target.ArchiveName("v0.0.1"))
 	files := []archiveFile{
 		{Name: target.BinaryName(), Mode: 0o755, Data: []byte("binary")},
 		{Name: "LICENSE", Mode: 0o644, Data: []byte("license")},
@@ -59,14 +59,14 @@ func TestVerifyRejectsChecksumMismatch(t *testing.T) {
 	), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := Verify(output, "v0.1.0", []Target{target}); err == nil {
+	if err := Verify(output, "v0.0.1", []Target{target}); err == nil {
 		t.Fatal("Verify() error = nil, want checksum mismatch")
 	}
 }
 
 func TestZipEntryNames(t *testing.T) {
 	target := Target{OS: "windows", Arch: "arm64"}
-	path := filepath.Join(t.TempDir(), target.ArchiveName("v0.1.0"))
+	path := filepath.Join(t.TempDir(), target.ArchiveName("v0.0.1"))
 	files := []archiveFile{
 		{Name: "README.md", Mode: 0o644, Data: []byte("readme")},
 		{Name: target.BinaryName(), Mode: 0o755, Data: []byte("binary")},

@@ -14,7 +14,7 @@ are initially unsigned and may trigger SmartScreen.
 ## Recommended reviewed installer
 
 ```powershell
-$version = "v0.1.0"
+$version = "v0.0.1"
 Invoke-WebRequest https://raw.githubusercontent.com/setup-env/app/main/install.ps1 -OutFile install.ps1
 Get-Content .\install.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Version $version
@@ -29,7 +29,7 @@ directory to current-user PATH without duplicates.
 
 ```powershell
 .\install.ps1                         # latest published release
-.\install.ps1 -Version v0.1.0         # explicit version
+.\install.ps1 -Version v0.0.1         # explicit version
 .\install.ps1 -Upgrade                # latest verified upgrade
 .\install.ps1 -InstallDir C:\My\Bin   # custom user-writable path
 .\install.ps1 -NoPath                 # do not modify user PATH
@@ -43,7 +43,7 @@ directory to current-user PATH without duplicates.
 2. Verify the archive:
 
    ```powershell
-   $asset = "setup-env_0.1.0_windows_amd64.zip" # use arm64 when appropriate
+   $asset = "setup-env_0.0.1_windows_amd64.zip" # use arm64 when appropriate
    $line = (Select-String -Path .\checksums.txt -Pattern "  $([regex]::Escape($asset))$").Line
    $expected = ($line -split '\s+')[0].ToLowerInvariant()
    $actual = (Get-FileHash -Algorithm SHA256 -Path ".\$asset").Hash.ToLowerInvariant()

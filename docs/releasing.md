@@ -3,7 +3,7 @@
 ## Version policy
 
 Setup Env uses semantic tags in the form `vMAJOR.MINOR.PATCH`. The prepared first
-public version is `v0.1.0`. Never reuse a tag or recreate a published version
+public version is `v0.0.1`. Never reuse a tag or recreate a published version
 with different contents; publish a patch version instead.
 
 Release commits must be merged into clean, synchronized `main`. Releases are
@@ -23,8 +23,8 @@ never created from feature branches.
    go test ./...
    go run ./cmd/setup-env module validate-catalog
    go run ./cmd/setup-env module validate examples/setup-env.yaml
-   make RELEASE_VERSION=v0.1.0 release-snapshot
-   make RELEASE_VERSION=v0.1.0 release-verify
+   make RELEASE_VERSION=v0.0.1 release-snapshot
+   make RELEASE_VERSION=v0.0.1 release-verify
    ```
 
 5. Inspect `dist/`: six archives plus `checksums.txt`, with no source tree,
@@ -37,8 +37,8 @@ never created from feature branches.
 Public tagging is an explicit release decision. From synchronized `main`:
 
 ```sh
-git tag -a v0.1.0 -m "Setup Env v0.1.0"
-git push origin v0.1.0
+git tag -a v0.0.1 -m "Setup Env v0.0.1"
+git push origin v0.0.1
 ```
 
 The tag-triggered workflow validates the exact tagged commit, full test/race

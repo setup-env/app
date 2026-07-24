@@ -8,7 +8,7 @@ fi
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 RELEASE_DIR=$1
-VERSION=${2:-v0.1.0}
+VERSION=${2:-v0.0.1}
 UPGRADE_RELEASE_DIR=${3:-$RELEASE_DIR}
 UPGRADE_VERSION=${4:-$VERSION}
 root=$(mktemp -d "${TMPDIR:-/tmp}/setup-env-shell-integration.XXXXXX")

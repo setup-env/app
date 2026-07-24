@@ -22,7 +22,7 @@ func main() {
 func run(ctx context.Context, arguments []string) error {
 	flags := flag.NewFlagSet("release", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
-	version := flags.String("version", "v0.1.0-snapshot", "semantic release version")
+	version := flags.String("version", "v0.0.1-snapshot", "semantic release version")
 	commit := flags.String("commit", "", "commit SHA (defaults to HEAD)")
 	dateText := flags.String("date", "", "RFC3339 build date (defaults to commit date)")
 	dirtyText := flags.String("dirty", "auto", "true, false, or auto")

@@ -13,7 +13,7 @@ are unsigned and unnotarized, so Gatekeeper may warn.
 ## Recommended reviewed installer
 
 ```sh
-version=v0.1.0
+version=v0.0.1
 curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
 less install.sh
 sh install.sh --version "$version"
@@ -25,7 +25,7 @@ needed, it prints Bash, Zsh, and Fish PATH instructions.
 
 ```sh
 sh install.sh                              # latest release
-sh install.sh --version v0.1.0             # explicit version
+sh install.sh --version v0.0.1             # explicit version
 sh install.sh --upgrade                    # latest verified upgrade
 sh install.sh --install-dir "$HOME/bin"    # custom path
 sh install.sh --uninstall --yes
@@ -35,7 +35,7 @@ sh install.sh --uninstall --purge --yes    # also configuration/cache
 ## Manual archive installation
 
 ```sh
-asset=setup-env_0.1.0_darwin_arm64.tar.gz # use amd64 on Intel
+asset=setup-env_0.0.1_darwin_arm64.tar.gz # use amd64 on Intel
 expected=$(awk -v asset="$asset" '$2 == asset {print $1}' checksums.txt)
 actual=$(shasum -a 256 "$asset" | awk '{print $1}')
 test "$actual" = "$expected"

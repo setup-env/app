@@ -7,7 +7,7 @@ func TestCurrentIncludesInjectedMetadata(t *testing.T) {
 	t.Cleanup(func() {
 		Version, Commit, Date, Dirty = originalVersion, originalCommit, originalDate, originalDirty
 	})
-	Version = "v0.1.0"
+	Version = "v0.0.1"
 	Commit = "abcdef123456"
 	Date = "2026-07-24T12:00:00Z"
 	Dirty = "false"

@@ -19,7 +19,7 @@ function Assert-Throws {
     throw "$Message. Expected an exception."
 }
 
-Assert-Equal (Normalize-SetupEnvVersion "0.1.0") "v0.1.0" "Version normalization failed"
+Assert-Equal (Normalize-SetupEnvVersion "0.0.1") "v0.0.1" "Version normalization failed"
 Assert-Equal (Normalize-SetupEnvVersion "v1.2.3-rc.1") "v1.2.3-rc.1" "Prerelease normalization failed"
 Assert-Throws { Normalize-SetupEnvVersion "latest-ish" } "Invalid version was accepted"
 Assert-Throws { Normalize-SetupEnvVersion "v1.2.3+build.4" } "Build-metadata version was accepted"
@@ -27,8 +27,8 @@ Assert-Equal (Get-SetupEnvArchitecture "AMD64") "amd64" "AMD64 mapping failed"
 Assert-Equal (Get-SetupEnvArchitecture "ARM64") "arm64" "ARM64 mapping failed"
 Assert-Throws { Get-SetupEnvArchitecture "x86" } "Unsupported architecture was accepted"
 Assert-Equal `
-    (Get-SetupEnvAssetName -ReleaseVersion "v0.1.0" -Architecture "arm64") `
-    "setup-env_0.1.0_windows_arm64.zip" `
+    (Get-SetupEnvAssetName -ReleaseVersion "v0.0.1" -Architecture "arm64") `
+    "setup-env_0.0.1_windows_arm64.zip" `
     "Asset name is incorrect"
 
 $pathValue = "C:\Tools;C:\Users\example\bin"
@@ -50,9 +50,9 @@ New-Item -ItemType Directory -Path $temporary | Out-Null
 try {
     $checksums = Join-Path $temporary "checksums.txt"
     $hash = "a" * 64
-    Set-Content -LiteralPath $checksums -Value "$hash  setup-env_0.1.0_windows_amd64.zip"
+    Set-Content -LiteralPath $checksums -Value "$hash  setup-env_0.0.1_windows_amd64.zip"
     Assert-Equal `
-        (Get-SetupEnvChecksum -ChecksumsPath $checksums -AssetName "setup-env_0.1.0_windows_amd64.zip") `
+        (Get-SetupEnvChecksum -ChecksumsPath $checksums -AssetName "setup-env_0.0.1_windows_amd64.zip") `
         $hash `
         "Checksum parsing failed"
     Assert-Throws {

@@ -9,7 +9,7 @@ machine-readable status, diagnostics, and a versioned local module catalog.
 Official binaries are distributed only through
 [GitHub Releases](https://github.com/setup-env/app/releases). Before running a
 bootstrap command, confirm that the requested release exists and review the
-downloaded installer. The prepared first version is `v0.1.0`; it is not
+downloaded installer. The prepared first version is `v0.0.1`; it is not
 available until that tag and release appear on the releases page.
 
 Installers use current-user directories, verify the archive with SHA-256 before
@@ -20,7 +20,7 @@ extraction, and do not require Git, Go, `gh`, administrator, or root access.
 PowerShell 5.1 or 7 on amd64 or arm64:
 
 ```powershell
-$version = "v0.1.0"
+$version = "v0.0.1"
 Invoke-WebRequest https://raw.githubusercontent.com/setup-env/app/main/install.ps1 -OutFile install.ps1
 Get-Content .\install.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Version $version
@@ -36,7 +36,7 @@ instructions: [Windows installation](docs/install/windows.md).
 POSIX shell on Intel or Apple Silicon:
 
 ```sh
-version=v0.1.0
+version=v0.0.1
 curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
 less install.sh
 sh install.sh --version "$version"
@@ -50,7 +50,7 @@ Detailed and manual instructions: [macOS installation](docs/install/macos.md).
 POSIX shell on amd64 or arm64:
 
 ```sh
-version=v0.1.0
+version=v0.0.1
 curl -fL https://raw.githubusercontent.com/setup-env/app/main/install.sh -o install.sh
 less install.sh
 sh install.sh --version "$version"

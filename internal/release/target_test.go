@@ -4,7 +4,7 @@ import "testing"
 
 func TestNormalizeVersion(t *testing.T) {
 	for input, want := range map[string]string{
-		"0.1.0":       "v0.1.0",
+		"0.0.1":       "v0.0.1",
 		"v1.2.3":      "v1.2.3",
 		"v1.2.3-rc.1": "v1.2.3-rc.1",
 	} {
@@ -25,12 +25,12 @@ func TestArtifactNames(t *testing.T) {
 		target Target
 		want   string
 	}{
-		{Target{OS: "windows", Arch: "amd64"}, "setup-env_0.1.0_windows_amd64.zip"},
-		{Target{OS: "darwin", Arch: "arm64"}, "setup-env_0.1.0_darwin_arm64.tar.gz"},
-		{Target{OS: "linux", Arch: "amd64"}, "setup-env_0.1.0_linux_amd64.tar.gz"},
+		{Target{OS: "windows", Arch: "amd64"}, "setup-env_0.0.1_windows_amd64.zip"},
+		{Target{OS: "darwin", Arch: "arm64"}, "setup-env_0.0.1_darwin_arm64.tar.gz"},
+		{Target{OS: "linux", Arch: "amd64"}, "setup-env_0.0.1_linux_amd64.tar.gz"},
 	}
 	for _, test := range tests {
-		if got := test.target.ArchiveName("v0.1.0"); got != test.want {
+		if got := test.target.ArchiveName("v0.0.1"); got != test.want {
 			t.Fatalf("%s ArchiveName() = %q, want %q", test.target, got, test.want)
 		}
 	}
