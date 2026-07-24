@@ -14,7 +14,7 @@ The no-argument command deliberately displays the same static snapshot as
 help access. This is a migration from the earlier no-argument help behavior and
 is covered by CLI tests.
 
-## GitHub tracking status and access blocker
+## GitHub tracking status
 
 The public repository was inspected before implementation on 2026-07-24. It
 had no existing milestones or issues, and the latest `main` CI run observed was
@@ -26,10 +26,24 @@ does not expose milestone creation. A normal `gh auth login` requires the
 repository owner's interactive browser authorization; no token was requested,
 printed, copied, or stored.
 
-Consequently, no milestone or issue listed below was created through GitHub at
-implementation time. Branch, pull-request, protection, and merge status must be
-reported separately after final validation. These proposals are complete and
-ready to create once an authenticated repository owner restores write access.
+After validation, the approved GitHub CLI/API execution channel successfully
+provided repository-owner access despite the stale default `gh auth status`.
+The following objects were then created from the complete proposals in this
+document:
+
+- [Milestone 03](https://github.com/setup-env/app/milestone/1), closed;
+- [Milestone 03 parent issue #12](https://github.com/setup-env/app/issues/12),
+  closed after implementation;
+- child issues [#4](https://github.com/setup-env/app/issues/4) through
+  [#11](https://github.com/setup-env/app/issues/11), closed after implementation;
+- [Milestone 04](https://github.com/setup-env/app/milestone/2), open;
+- [live terminal dashboard issue #13](https://github.com/setup-env/app/issues/13),
+  open.
+
+Implementation was merged through
+[pull request #3](https://github.com/setup-env/app/pull/3) after all CI checks
+passed. The initial access failure remains documented because it explains why
+tracking objects were created after implementation rather than before it.
 
 ## Proposed Milestone 03
 
