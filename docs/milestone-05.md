@@ -96,6 +96,29 @@ proxy, and network failures.
 No test modifies persistent runner PATH or real user installation directories.
 No installer test requires public GitHub access.
 
+## Validation evidence
+
+PR CI run
+[`30060618875`](https://github.com/setup-env/app/actions/runs/30060618875)
+passed all fourteen jobs for feature commit `b13a58b`:
+
+- Windows, macOS, and Ubuntu formatting, vet, tests, installer units, catalog,
+  status/JSON, and native build validation;
+- Windows, macOS, and Linux cross-builds on amd64 and arm64;
+- Linux race testing;
+- the complete six-archive release snapshot, exact matrix, metadata, checksum,
+  content, and Linux reproducibility checks;
+- offline install `v0.1.0`, upgrade to `v0.1.1`, scoped uninstall, unrelated-file
+  preservation, corruption rejection, and cleanup on Ubuntu amd64, macOS arm64,
+  and Windows amd64.
+
+Local PowerShell 5.1 testing exercised the Windows amd64 installer against real
+archives and the packaged binary across all existing CLI commands. Independent
+Linux amd64 candidate builds both produced SHA-256
+`19402f645d6e0bf0d65769edd5c3b33ce0a99ef59b2e354863c9168aac92a09f`.
+Artifacts were also scanned for the local username/path, token patterns, and
+private-key markers with no matches.
+
 ## Workflow security and publication
 
 PR CI has `contents: read`. The separate `v*` workflow has only
