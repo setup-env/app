@@ -22,7 +22,7 @@ func TestWorkflowYAMLAndPermissionBoundaries(t *testing.T) {
 			t.Fatalf("%s is invalid YAML: %v", name, err)
 		}
 		text := string(data)
-		if !strings.Contains(text, "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803") ||
+		if !strings.Contains(text, "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1") ||
 			!strings.Contains(text, "actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e") {
 			t.Fatalf("%s does not pin release-critical official actions", name)
 		}
