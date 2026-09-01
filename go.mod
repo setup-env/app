@@ -5,7 +5,7 @@ go 1.26
 toolchain go1.26.5
 
 require (
-	charm.land/bubbletea/v2 v2.0.8
+	charm.land/bubbletea/v2 v2.0.9
 	github.com/charmbracelet/x/term v0.2.2
 	github.com/goccy/go-yaml v1.19.2
 )
